@@ -1,19 +1,99 @@
-# Configuración para GitHub Pages
+# ============================================
+# CONFIGURACIÓN PARA GITHUB PAGES
+# ERP Cuba - Proyecto Bernal / Ke Proyecto
+# ============================================
+
+# Nombre del sitio
 title: ERP Cuba
-description: Sistema de gestión empresarial para Cuba
-theme: jekyll-theme-minimal
+description: Sistema de gestión empresarial para Cuba - Proyecto Bernal y Ke Proyecto
+
+# Tema (opcional, usa el mínimo para mejor rendimiento)
+theme: null
+
+# Configuración de build
+markdown: GFM
+highlighter: rouge
+
+# Plugins (GitHub Pages solo permite ciertos plugins)
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Excluir archivos innecesarios del build
+exclude:
+  - .gitignore
+  - .vscode/
+  - node_modules/
+  - package.json
+  - package-lock.json
+  - README.md
+  - LICENSE
+  - .github/
+
+# Incluir archivos específicos
+include:
+  - .htaccess
+  - _redirects
+
+# Configuración de URLs
+url: "https://TU_USUARIO.github.io"
+baseurl: "/erp-cuba"
 
 # Compresión y optimización
 compress_html:
   clippings: all
-  comments: all
+  comments: ["<!-- ", " -->"]
   endings: all
-  startings: []
+  ignore:
+    envs: []
   blanklines: false
+  profile: false
+  startings: []
 
-# Excluir archivos innecesarios
-exclude:
-  - .gitignore
-  - README.md
-  - package.json
-  - node_modules
+# Configuración SEO
+twitter:
+  username: ""
+  card: summary
+facebook:
+  publisher: ""
+logo: /assets/logo.png
+social:
+  name: ERP Cuba
+  links: []
+
+# Idioma por defecto
+lang: es-ES
+
+# Zona horaria
+timezone: America/Havana
+
+# Paginación (desactivada para SPA)
+paginate: 0
+paginate_path: ""
+
+# Colecciones (no usadas por ahora)
+collections: {}
+
+# Valores por defecto para front matter
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: null
+      sitemap: true
+
+# Webmaster tools
+webmaster_verifications:
+  google: ""
+  bing: ""
+  alexa: ""
+  yandex: ""
+  baidu: ""
+
+# ============================================
+# INSTRUCCIONES:
+# ============================================
+# 1. Cambia "TU_USUARIO" por tu nombre de usuario de GitHub (línea 37)
+# 2. Cambia "/erp-cuba" por el nombre de tu repositorio si es diferente (línea 38)
+# 3. Guarda este archivo en la raíz de tu repositorio
+# 4. GitHub Pages lo procesará automáticamente
