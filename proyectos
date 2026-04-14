@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyectos - ERP Cuba</title>
+    <link rel="stylesheet" href="css/estilo.css">
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="app-container" id="appContainer">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 id="proyectoNombre">🇨🇺 Cargando...</h2>
+                <p id="userNombre"></p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+                <a href="clientes.html" class="nav-item">
+                    <span class="icon">👥</span> Clientes
+                </a>
+                <a href="trabajadores.html" class="nav-item">
+                    <span class="icon">👷</span> Trabajadores
+                </a>
+                <a href="proyectos.html" class="nav-item active">
+                    <span class="icon">🏗️</span> Proyectos
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button class="btn-logout" onclick="logout()">🚪 Cerrar Sesión</button>
+            </div>
+        </aside>
+        
+        <!-- Contenido Principal -->
+        <main class="main-content" id="mainContent">
+            <header class="top-bar">
+                <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                <h1>🏗️ Gestión de Proyectos</h1>
+                <div class="user-info">
+                    <button class="btn-primary" onclick="abrirModalNuevoProyecto()">➕ Nuevo Proyecto</button>
+                </div>
+            </header>
+            
+            <!-- Filtros -->
+            <div class="search-bar">
+                <input type="text" id="busquedaProyecto" placeholder="🔍 Buscar por nombre, cliente..." onkeyup="filtrarProyectos()">
+                <select id="filtroEstado" onchange="filtrarProyectos()">
+                    <option value="">Todos los estados</option>
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="En Progreso">En Progreso</option>
+                    <option value="Completado">Completado</option>
+                    <option value="Cancelado">Cancelado</option>
+                    <option value="Facturado">Facturado</option>
+                </select>
+                <select id="filtroPrioridad" onchange="filtrarProyectos()">
+                    <option value="">Todas las prioridades</option>
+                    <option value="Baja">Baja</option>
+                    <option value="Media">Media</option>
+                    <option value="Alta">Alta</option>
+                    <option value="Urgente">Urgente</option>
+                </select>
+            </div>
+            
+            <!-- Vista de Proyectos -->
+            <div class="proyectos-grid" id="proyectosGrid">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal para Nuevo/Editar Proyecto -->
+    <div class="modal" id="modalProyecto">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2 id="modalTitulo">➕ Nuevo Proyecto</h2>
+                <button class="modal-close" onclick="cerrarModalProyecto()">&times;</button>
+            </div>
+            
+            <form id="formProyecto" onsubmit="event.preventDefault(); guardarProyecto();">
+                <input type="hidden" id="proyectoId">
+                
+                <div class="form-group">
+                    <label>📋 Nombre del Proyecto *</label>
+                    <input type="text" id="proyectoNombre" placeholder="Ej: Reforma Apartamento" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>👥 Cliente *</label>
+                        <select id="proyectoCliente" required>
+                            <option value="">Seleccionar cliente...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📊 Estado</label>
+                        <select id="proyectoEstado">
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="En Progreso">En Progreso</option>
+                            <option value="Completado">Completado</option>
+                            <option value="Cancelado">Cancelado</option>
+                            <option value="Facturado">Facturado</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>⚠️ Prioridad</label>
+                        <select id="proyectoPrioridad">
+                            <option value="Baja">Baja</option>
+                            <option value="Media" selected>Media</option>
+                            <option value="Alta">Alta</option>
+                            <option value="Urgente">Urgente</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>💰 Moneda Principal</label>
+                        <select id="proyectoMoneda">
+                            <option value="CUP">CUP (Peso Cubano)</option>
+                            <option value="USD">USD (Dólar)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>📅 Fecha Inicio</label>
+                        <input type="date" id="proyectoFechaInicio">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📅 Fecha Fin Estimada</label>
+                        <input type="date" id="proyectoFechaFinEstimada">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>💰 Presupuesto (CUP)</label>
+                        <input type="number" id="proyectoPresupuestoCUP" placeholder="0.00" step="0.01" min="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>💵 Presupuesto (USD)</label>
+                        <input type="number" id="proyectoPresupuestoUSD" placeholder="0.00" step="0.01" min="0">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>📝 Descripción</label>
+                    <textarea id="proyectoDescripcion" rows="3" placeholder="Detalles del proyecto..."></textarea>
+                </div>
+                
+                <!-- Sección de Asignación de Trabajadores -->
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
+                    <h3>👷 Asignar Trabajadores</h3>
+                    <div id="asignacionesContainer">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                    <button type="button" class="btn-secondary" onclick="agregarAsignacion()" style="margin-top: 10px;">➕ Agregar Trabajador</button>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="cerrarModalProyecto()">Cancelar</button>
+                    <button type="submit" class="btn-primary">💾 Guardar Proyecto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // GESTIÓN DE PROYECTOS - ERP CUBA
+        // ============================================
+        
+        const SUPABASE_URL = 'https://TU_PROJECT_URL.supabase.co';
+        const SUPABASE_KEY = 'TU_ANON_KEY';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let currentUser = null;
+        let proyectosLista = [];
+        let clientesLista = [];
+        let trabajadoresLista = [];
+        let asignacionesTemp = [];
+        
+        // ===== INICIALIZAR =====
+        async function inicializar() {
+            verificarSesion();
+            await cargarClientes();
+            await cargarTrabajadores();
+            await cargarProyectos();
+        }
+        
+        function verificarSesion() {
+            const session = localStorage.getItem('erp_session') || sessionStorage.getItem('erp_session');
+            
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            try {
+                currentUser = JSON.parse(session);
+                document.getElementById('proyectoNombre').textContent = currentUser.proyecto;
+                document.getElementById('userNombre').textContent = currentUser.nombre;
+                
+                const container = document.getElementById('appContainer');
+                if (currentUser.proyecto === 'Proyecto Bernal') {
+                    container.classList.add('proyecto-bernal');
+                } else {
+                    container.classList.add('proyecto-ke');
+                }
+            } catch (e) {
+                window.location.href = 'index.html';
+            }
+        }
+        
+        async function cargarClientes() {
+            try {
+                const { data } = await supabase
+                    .from('clientes')
+                    .select('id, nombre')
+                    .eq('proyecto', currentUser.proyecto)
+                    .eq('activo', true)
+                    .order('nombre');
+                
+                clientesLista = data || [];
+            } catch (error) {
+                console.error('Error cargando clientes:', error);
+            }
+        }
+        
+        async function cargarTrabajadores() {
+            try {
+                const { data } = await supabase
+                    .from('trabajadores')
+                    .select('id, nombre, apellidos, tarifa_hora_cup, especialidad')
+                    .eq('proyecto', currentUser.proyecto)
+                    .eq('activo', true)
+                    .order('nombre');
+                
+                trabajadoresLista = data || [];
+            } catch (error) {
+                console.error('Error cargando trabajadores:', error);
+            }
+        }
+        
+        // ===== CARGAR PROYECTOS =====
+        async function cargarProyectos() {
+            try {
+                const { data, error } = await supabase
+                    .from('proyectos')
+                    .select(`
+                        *,
+                        clientes (nombre)
+                    `)
+                    .eq('proyecto', currentUser.proyecto)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                proyectosLista = data || [];
+                mostrarProyectos(proyectosLista);
+                
+            } catch (error) {
+                console.error('Error cargando proyectos:', error);
+                document.getElementById('proyectosGrid').innerHTML = 
+                    '<p style="text-align: center; color: red;">Error al cargar proyectos</p>';
+            }
+        }
+        
+        function mostrarProyectos(proyectos) {
+            const grid = document.getElementById('proyectosGrid');
+            
+            if (!proyectos || proyectos.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; grid-column: 1/-1;">No hay proyectos registrados</p>';
+                return;
+            }
+            
+            grid.innerHTML = proyectos.map(p => {
+                const fechaInicio = p.fecha_inicio ? new Date(p.fecha_inicio).toLocaleDateString('es-ES') : 'No definida';
+                const fechaFin = p.fecha_fin_estimada ? new Date(p.fecha_fin_estimada).toLocaleDateString('es-ES') : 'No definida';
+                const presupuesto = p.presupuesto_cup || 0;
+                
+                return `
+                    <div class="proyecto-card" onclick="verDetalleProyecto('${p.id}')">
+                        <div class="proyecto-header">
+                            <h3>${p.nombre}</h3>
+                            <span class="badge ${p.estado.toLowerCase().replace(' ', '')}">${p.estado}</span>
+                        </div>
+                        <p><strong>Cliente:</strong> ${p.clientes?.nombre || 'Sin cliente'}</p>
+                        <p><strong>Prioridad:</strong> <span class="badge ${p.prioridad.toLowerCase()}">${p.prioridad}</span></p>
+                        <p><strong>Inicio:</strong> ${fechaInicio}</p>
+                        <p><strong>Fin estimado:</strong> ${fechaFin}</p>
+                        <p><strong>Presupuesto:</strong> ${presupuesto.toLocaleString('es-ES')} ${p.moneda_principal || 'CUP'}</p>
+                        <div class="proyecto-actions" onclick="event.stopPropagation()">
+                            <button class="btn-icon" onclick="editarProyecto('${p.id}')" title="Editar">✏️</button>
+                            <button class="btn-icon" onclick="cambiarEstadoProyecto('${p.id}', '${p.estado}')" title="Cambiar estado">🔄</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // ===== FILTRAR PROYECTOS =====
+        function filtrarProyectos() {
+            const busqueda = document.getElementById('busquedaProyecto').value.toLowerCase();
+            const estado = document.getElementById('filtroEstado').value;
+            const prioridad = document.getElementById('filtroPrioridad').value;
+            
+            const filtrados = proyectosLista.filter(p => {
+                const coincideBusqueda = !busqueda || 
+                    p.nombre.toLowerCase().includes(busqueda) ||
+                    (p.clientes?.nombre && p.clientes.nombre.toLowerCase().includes(busqueda));
+                
+                const coincideEstado = !estado || p.estado === estado;
+                const coincidePrioridad = !prioridad || p.prioridad === prioridad;
+                
+                return coincideBusqueda && coincideEstado && coincidePrioridad;
+            });
+            
+            mostrarProyectos(filtrados);
+        }
+        
+        // ===== MODAL NUEVO PROYECTO =====
+        function abrirModalNuevoProyecto() {
+            document.getElementById('modalTitulo').textContent = '➕ Nuevo Proyecto';
+            document.getElementById('formProyecto').reset();
+            document.getElementById('proyectoId').value = '';
+            asignacionesTemp = [];
+            
+            // Cargar select de clientes
+            const selectCliente = document.getElementById('proyectoCliente');
+            selectCliente.innerHTML = '<option value="">Seleccionar cliente...</option>';
+            clientesLista.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c.id;
+                option.textContent = c.nombre;
+                selectCliente.appendChild(option);
+            });
+            
+            document.getElementById('asignacionesContainer').innerHTML = '';
+            document.getElementById('modalProyecto').classList.add('active');
+        }
+        
+        function cerrarModalProyecto() {
+            document.getElementById('modalProyecto').classList.remove('active');
+        }
+        
+        // ===== AGREGAR ASIGNACIÓN =====
+        function agregarAsignacion() {
+            const container = document.getElementById('asignacionesContainer');
+            const index = asignacionesTemp.length;
+            
+            const asignacionDiv = document.createElement('div');
+            asignacionDiv.className = 'asignacion-row';
+            asignacionDiv.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; margin-bottom: 10px; padding: 10px; background: #f5f5f5; border-radius: 8px;';
+            
+            // Select de trabajador
+            const selectTrabajador = document.createElement('select');
+            selectTrabajador.className = 'form-control';
+            selectTrabajador.innerHTML = '<option value="">Seleccionar trabajador...</option>';
+            trabajadoresLista.forEach(t => {
+                const option = document.createElement('option');
+                option.value = t.id;
+                option.textContent = `${t.nombre} ${t.apellidos} (${t.especialidad || 'Sin esp.'})`;
+                option.dataset.tarifa = t.tarifa_hora_cup || 0;
+                selectTrabajador.appendChild(option);
+            });
+            selectTrabajador.onchange = function() { actualizarTarifaAsignacion(this); };
+            
+            // Input de horas
+            const inputHoras = document.createElement('input');
+            inputHoras.type = 'number';
+            inputHoras.placeholder = 'Horas';
+            inputHoras.min = '0';
+            inputHoras.step = '0.5';
+            inputHoras.value = '0';
+            
+            // Input de tarifa
+            const inputTarifa = document.createElement('input');
+            inputTarifa.type = 'number';
+            inputTarifa.placeholder = 'Tarifa CUP/h';
+            inputTarifa.min = '0';
+            inputTarifa.step = '0.01';
+            inputTarifa.value = '0';
+            inputTarifa.readOnly = true;
+            
+            // Botón eliminar
+            const btnEliminar = document.createElement('button');
+            btnEliminar.type = 'button';
+            btnEliminar.textContent = '🗑️';
+            btnEliminar.className = 'btn-icon';
+            btnEliminar.onclick = function() { this.parentElement.remove(); };
+            
+            asignacionDiv.appendChild(selectTrabajador);
+            asignacionDiv.appendChild(inputHoras);
+            asignacionDiv.appendChild(inputTarifa);
+            asignacionDiv.appendChild(btnEliminar);
+            
+            container.appendChild(asignacionDiv);
+        }
+        
+        function actualizarTarifaAsignacion(select) {
+            const option = select.selectedOptions[0];
+            const tarifa = option ? option.dataset.tarifa : 0;
+            const row = select.parentElement;
+            const inputTarifa = row.querySelector('input[type="number"]:last-of-type');
+            if (inputTarifa) {
+                inputTarifa.value = tarifa;
+            }
+        }
+        
+        // ===== EDITAR PROYECTO =====
+        async function editarProyecto(id) {
+            try {
+                const { data, error } = await supabase
+                    .from('proyectos')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+                
+                if (error) throw error;
+                
+                document.getElementById('modalTitulo').textContent = '✏️ Editar Proyecto';
+                document.getElementById('proyectoId').value = data.id;
+                document.getElementById('proyectoNombre').value = data.nombre || '';
+                document.getElementById('proyectoEstado').value = data.estado || 'Pendiente';
+                document.getElementById('proyectoPrioridad').value = data.prioridad || 'Media';
+                document.getElementById('proyectoMoneda').value = data.moneda_principal || 'CUP';
+                document.getElementById('proyectoFechaInicio').value = data.fecha_inicio || '';
+                document.getElementById('proyectoFechaFinEstimada').value = data.fecha_fin_estimada || '';
+                document.getElementById('proyectoPresupuestoCUP').value = data.presupuesto_cup || '';
+                document.getElementById('proyectoPresupuestoUSD').value = data.presupuesto_usd || '';
+                document.getElementById('proyectoDescripcion').value = data.descripcion || '';
+                
+                // Cargar select de clientes
+                const selectCliente = document.getElementById('proyectoCliente');
+                selectCliente.innerHTML = '<option value="">Seleccionar cliente...</option>';
+                clientesLista.forEach(c => {
+                    const option = document.createElement('option');
+                    option.value = c.id;
+                    option.textContent = c.nombre;
+                    if (c.id === data.cliente_id) option.selected = true;
+                    selectCliente.appendChild(option);
+                });
+                
+                document.getElementById('modalProyecto').classList.add('active');
+                
+            } catch (error) {
+                console.error('Error cargando proyecto:', error);
+                alert('Error al cargar los datos del proyecto');
+            }
+        }
+        
+        // ===== GUARDAR PROYECTO =====
+        async function guardarProyecto() {
+            const id = document.getElementById('proyectoId').value;
+            
+            const proyectoData = {
+                proyecto: currentUser.proyecto,
+                nombre: document.getElementById('proyectoNombre').value,
+                cliente_id: document.getElementById('proyectoCliente').value || null,
+                estado: document.getElementById('proyectoEstado').value,
+                prioridad: document.getElementById('proyectoPrioridad').value,
+                moneda_principal: document.getElementById('proyectoMoneda').value,
+                fecha_inicio: document.getElementById('proyectoFechaInicio').value || null,
+                fecha_fin_estimada: document.getElementById('proyectoFechaFinEstimada').value || null,
+                presupuesto_cup: parseFloat(document.getElementById('proyectoPresupuestoCUP').value) || 0,
+                presupuesto_usd: parseFloat(document.getElementById('proyectoPresupuestoUSD').value) || 0,
+                descripcion: document.getElementById('proyectoDescripcion').value || null,
+                updated_at: new Date()
+            };
+            
+            try {
+                let result;
+                
+                if (id) {
+                    result = await supabase
+                        .from('proyectos')
+                        .update(proyectoData)
+                        .eq('id', id);
+                } else {
+                    result = await supabase
+                        .from('proyectos')
+                        .insert([proyectoData])
+                        .select();
+                }
+                
+                if (result.error) throw result.error;
+                
+                cerrarModalProyecto();
+                cargarProyectos();
+                alert('✅ Proyecto guardado exitosamente');
+                
+            } catch (error) {
+                console.error('Error guardando proyecto:', error);
+                alert('❌ Error al guardar el proyecto');
+            }
+        }
+        
+        // ===== CAMBIAR ESTADO =====
+        async function cambiarEstadoProyecto(id, estadoActual) {
+            const estados = ['Pendiente', 'En Progreso', 'Completado', 'Cancelado', 'Facturado'];
+            const nuevoEstado = prompt(`Cambiar estado de "${estadoActual}" a:\n${estados.join(', ')}`);
+            
+            if (!nuevoEstado || !estados.includes(nuevoEstado)) {
+                alert('Estado no válido');
+                return;
+            }
+            
+            try {
+                const { error } = await supabase
+                    .from('proyectos')
+                    .update({ 
+                        estado: nuevoEstado, 
+                        updated_at: new Date(),
+                        ...(nuevoEstado === 'Completado' ? { fecha_fin_real: new Date().toISOString().split('T')[0] } : {})
+                    })
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                cargarProyectos();
+                
+            } catch (error) {
+                console.error('Error cambiando estado:', error);
+                alert('Error al cambiar el estado del proyecto');
+            }
+        }
+        
+        function verDetalleProyecto(id) {
+            alert(`Ver detalles del proyecto ${id}\n\nPróximamente: Pantalla de detalle completo con seguimiento`);
+        }
+        
+        function logout() {
+            localStorage.removeItem('erp_session');
+            sessionStorage.removeItem('erp_session');
+            window.location.href = 'index.html';
+        }
+        
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('closed');
+            document.getElementById('mainContent').classList.toggle('expanded');
+        }
+        
+        // Inicializar al cargar
+        inicializar();
+    </script>
+    
+    <style>
+        /* Estilos adicionales para proyectos */
+        .proyectos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .proyecto-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+        
+        .proyecto-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .proyecto-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .proyecto-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: var(--dark);
+        }
+        
+        .proyecto-card p {
+            margin: 8px 0;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .proyecto-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            justify-content: flex-end;
+        }
+        
+        .badge.inactivo {
+            background: #e0e0e0;
+            color: #666;
+        }
+        
+        .badge.Baja { background: #d5f5e3; color: #27ae60; }
+        .badge.Media { background: #fdebd0; color: #f39c12; }
+        .badge.Alta { background: #fadbd8; color: #e74c3c; }
+        .badge.Urgente { background: #c0392b; color: white; }
+        
+        .badge.Pendiente { background: #fdebd0; color: #f39c12; }
+        .badge.En.Progreso { background: #d6eaf8; color: #2980b9; }
+        .badge.Completado { background: #d5f5e3; color: #27ae60; }
+        .badge.Cancelado { background: #e0e0e0; color: #666; }
+        .badge.Facturado { background: #d4e6f1; color: #1a5276; }
+        
+        .btn-icon {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .btn-icon:hover {
+            background: #f0f0f0;
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+    </style>
+</body>
+</html>
