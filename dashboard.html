@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - ERP Cuba</title>
-    <link rel="manifest" href="manifest.json">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -13,9 +11,22 @@
             box-sizing: border-box;
         }
         
+        :root {
+            --primary: #1a5276;
+            --secondary: #2980b9;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #c0392b;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --white: #ffffff;
+        }
+        
         body {
             font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-            background: #ecf0f1;
+            background: var(--light);
+            color: #333;
+            line-height: 1.6;
         }
         
         .app-container {
@@ -25,7 +36,7 @@
         
         .sidebar {
             width: 280px;
-            background: #2c3e50;
+            background: var(--dark);
             color: white;
             position: fixed;
             height: 100vh;
@@ -33,6 +44,7 @@
             top: 0;
             display: flex;
             flex-direction: column;
+            z-index: 1000;
         }
         
         .sidebar-header {
@@ -72,9 +84,9 @@
         }
         
         .nav-item.active {
-            background: #1a5276;
+            background: var(--primary);
             color: white;
-            border-left: 4px solid #f39c12;
+            border-left: 4px solid var(--warning);
         }
         
         .nav-item .icon {
@@ -99,13 +111,15 @@
         }
         
         .btn-logout:hover {
-            background: #c0392b;
+            background: var(--danger);
+            border-color: var(--danger);
         }
         
         .main-content {
             flex: 1;
             margin-left: 280px;
             padding: 20px;
+            background: var(--light);
             min-height: 100vh;
         }
         
@@ -122,7 +136,7 @@
         
         .top-bar h1 {
             font-size: 22px;
-            color: #2c3e50;
+            color: var(--dark);
         }
         
         .user-info {
@@ -150,7 +164,7 @@
         
         .stat-icon {
             font-size: 40px;
-            background: #ecf0f1;
+            background: var(--light);
             width: 60px;
             height: 60px;
             display: flex;
@@ -161,7 +175,7 @@
         
         .stat-info h3 {
             font-size: 28px;
-            color: #2c3e50;
+            color: var(--dark);
             margin-bottom: 5px;
         }
         
@@ -180,8 +194,12 @@
         
         .recent-section h2 {
             margin-bottom: 20px;
-            color: #2c3e50;
+            color: var(--dark);
             font-size: 18px;
+        }
+        
+        .table-container {
+            overflow-x: auto;
         }
         
         table {
@@ -196,9 +214,9 @@
         }
         
         th {
-            background: #ecf0f1;
+            background: var(--light);
             font-weight: 600;
-            color: #2c3e50;
+            color: var(--dark);
         }
         
         .badge {
@@ -206,29 +224,53 @@
             border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
+            display: inline-block;
         }
         
-        .badge.activo { background: #d5f5e3; color: #27ae60; }
-        .badge.pendiente { background: #fdebd0; color: #f39c12; }
-        .badge.completado { background: #d6eaf8; color: #1a5276; }
-        .badge.urgente { background: #fadbd8; color: #c0392b; }
+        .badge.Pendiente { background: #fdebd0; color: #f39c12; }
+        .badge.En.Progreso { background: #d6eaf8; color: #2980b9; }
+        .badge.Completado { background: #d5f5e3; color: #27ae60; }
+        .badge.Urgente { background: #fadbd8; color: #c0392b; }
         
         .btn-primary {
-            background: #1a5276;
+            background: var(--primary);
             color: white;
             border: none;
             padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        .btn-primary:hover {
+            background: var(--secondary);
+        }
+        
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
         }
         
         @media (max-width: 768px) {
             .sidebar {
-                display: none;
+                transform: translateX(-280px);
+                transition: transform 0.3s;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
             }
             
             .main-content {
                 margin-left: 0;
+            }
+            
+            .menu-toggle {
+                display: block;
             }
             
             .dashboard-grid {
@@ -236,10 +278,13 @@
             }
         }
     </style>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="app-container">
-        <aside class="sidebar">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h2 id="proyectoNombre">🇨🇺 Cargando...</h2>
                 <p id="userNombre"></p>
@@ -265,14 +310,17 @@
             </div>
         </aside>
         
-        <main class="main-content">
+        <!-- Contenido Principal -->
+        <main class="main-content" id="mainContent">
             <header class="top-bar">
+                <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
                 <h1>📊 Dashboard</h1>
                 <div class="user-info">
                     <span id="fechaActual"></span>
                 </div>
             </header>
             
+            <!-- Tarjetas de Resumen -->
             <div class="dashboard-grid">
                 <div class="stat-card">
                     <div class="stat-icon">🏗️</div>
@@ -307,50 +355,86 @@
                 </div>
             </div>
             
+            <!-- Proyectos Recientes -->
             <div class="recent-section">
-                <h2>📋 Proyectos Recientes</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Proyecto</th>
-                            <th>Cliente</th>
-                            <th>Estado</th>
-                            <th>Presupuesto</th>
-                        </tr>
-                    </thead>
-                    <tbody id="proyectosBody">
-                        <tr><td colspan="4" style="text-align: center;">Cargando...</td></tr>
-                    </tbody>
-                </table>
+                <h2>📋 Proyectos en Curso</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Proyecto</th>
+                                <th>Cliente</th>
+                                <th>Estado</th>
+                                <th>Prioridad</th>
+                                <th>Presupuesto</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="proyectosBody">
+                            <tr><td colspan="6" style="text-align: center;">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Próximos Vencimientos -->
+            <div class="recent-section">
+                <h2>⏰ Próximos Vencimientos</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Proyecto</th>
+                                <th>Fecha Entrega</th>
+                                <th>Días Restantes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vencimientosBody">
+                            <tr><td colspan="3" style="text-align: center;">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </main>
     </div>
 
     <script>
+        // Configuración
         const SUPABASE_URL = 'https://TU_PROJECT_URL.supabase.co';
         const SUPABASE_KEY = 'TU_ANON_KEY';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
         let currentUser = null;
         
+        // Verificar sesión
         function verificarSesion() {
             const session = localStorage.getItem('erp_session') || sessionStorage.getItem('erp_session');
             
             if (!session) {
                 window.location.href = 'index.html';
-                return;
+                return null;
             }
             
             try {
                 currentUser = JSON.parse(session);
                 document.getElementById('proyectoNombre').textContent = currentUser.proyecto || 'ERP Cuba';
                 document.getElementById('userNombre').textContent = currentUser.nombre || '';
+                return currentUser;
             } catch (e) {
                 window.location.href = 'index.html';
+                return null;
             }
         }
         
-        async function cargarDashboard() {
+        // Actualizar fecha
+        function actualizarFecha() {
+            const ahora = new Date();
+            const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('fechaActual').textContent = ahora.toLocaleDateString('es-ES', opciones);
+        }
+        
+        // Cargar estadísticas
+        async function cargarEstadisticas() {
             try {
                 const proyecto = currentUser.proyecto;
                 
@@ -363,67 +447,125 @@
                 
                 document.getElementById('totalProyectos').textContent = proyectosActivos || 0;
                 
-                // Total clientes
-                const { count: totalClientes } = await supabase
+                // Clientes
+                const { count: clientes } = await supabase
                     .from('clientes')
                     .select('*', { count: 'exact', head: true })
                     .eq('proyecto', proyecto)
                     .eq('activo', true);
                 
-                document.getElementById('totalClientes').textContent = totalClientes || 0;
+                document.getElementById('totalClientes').textContent = clientes || 0;
                 
-                // Total trabajadores
-                const { count: totalTrabajadores } = await supabase
+                // Trabajadores
+                const { count: trabajadores } = await supabase
                     .from('trabajadores')
                     .select('*', { count: 'exact', head: true })
                     .eq('proyecto', proyecto)
                     .eq('activo', true);
                 
-                document.getElementById('totalTrabajadores').textContent = totalTrabajadores || 0;
+                document.getElementById('totalTrabajadores').textContent = trabajadores || 0;
                 
-                // Proyectos recientes
-                const { data: proyectos } = await supabase
+                // Presupuesto total
+                const { data: presupuestos } = await supabase
                     .from('proyectos')
-                    .select(`
-                        nombre,
-                        estado,
-                        presupuesto_cup,
-                        clientes (nombre)
-                    `)
+                    .select('presupuesto_cup')
                     .eq('proyecto', proyecto)
-                    .order('created_at', { ascending: false })
-                    .limit(5);
+                    .in('estado', ['Pendiente', 'En Progreso']);
                 
-                const tbody = document.getElementById('proyectosBody');
-                
-                if (proyectos && proyectos.length > 0) {
-                    let totalPresupuesto = 0;
-                    tbody.innerHTML = proyectos.map(p => {
-                        totalPresupuesto += p.presupuesto_cup || 0;
-                        return `
-                            <tr>
-                                <td><strong>${p.nombre}</strong></td>
-                                <td>${p.clientes?.nombre || 'Sin cliente'}</td>
-                                <td><span class="badge ${p.estado.toLowerCase().replace(' ', '')}">${p.estado}</span></td>
-                                <td>${(p.presupuesto_cup || 0).toLocaleString()} CUP</td>
-                            </tr>
-                        `;
-                    }).join('');
-                    
-                    document.getElementById('totalPresupuesto').textContent = `${totalPresupuesto.toLocaleString()} CUP`;
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No hay proyectos registrados</td></tr>';
-                }
+                const total = presupuestos?.reduce((sum, p) => sum + (p.presupuesto_cup || 0), 0) || 0;
+                document.getElementById('totalPresupuesto').textContent = `${total.toLocaleString('es-ES')} CUP`;
                 
             } catch (error) {
-                console.error('Error cargando dashboard:', error);
+                console.error('Error cargando estadísticas:', error);
             }
         }
         
-        function actualizarFecha() {
-            const ahora = new Date();
-            const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('fechaActual').textContent = ahora.toLocaleDateString('es-ES', opciones);
+        // Cargar proyectos
+        async function cargarProyectos() {
+            try {
+                const { data, error } = await supabase
+                    .from('proyectos')
+                    .select(`
+                        id, nombre, estado, prioridad, presupuesto_cup, fecha_fin_estimada,
+                        clientes (nombre)
+                    `)
+                    .eq('proyecto', currentUser.proyecto)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                if (error) throw error;
+                
+                const tbody = document.getElementById('proyectosBody');
+                
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay proyectos</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = data.map(p => `
+                    <tr>
+                        <td><strong>${p.nombre}</strong></td>
+                        <td>${p.clientes?.nombre || 'Sin cliente'}</td>
+                        <td><span class="badge ${p.estado.replace(' ', '.')}">${p.estado}</span></td>
+                        <td><span class="badge ${p.prioridad}">${p.prioridad}</span></td>
+                        <td>${(p.presupuesto_cup || 0).toLocaleString('es-ES')} CUP</td>
+                        <td><button class="btn-primary" onclick="verProyecto('${p.id}')">Ver</button></td>
+                    </tr>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error cargando proyectos:', error);
+            }
+        }
+        
+        // Cargar vencimientos
+        async function cargarVencimientos() {
+            try {
+                const { data, error } = await supabase
+                    .from('proyectos')
+                    .select('nombre, fecha_fin_estimada, estado')
+                    .eq('proyecto', currentUser.proyecto)
+                    .in('estado', ['Pendiente', 'En Progreso'])
+                    .not('fecha_fin_estimada', 'is', null)
+                    .order('fecha_fin_estimada', { ascending: true })
+                    .limit(5);
+                
+                if (error) throw error;
+                
+                const tbody = document.getElementById('vencimientosBody');
+                
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No hay vencimientos</td></tr>';
+                    return;
+                }
+                
+                const hoy = new Date();
+                
+                tbody.innerHTML = data.map(p => {
+                    const fechaFin = new Date(p.fecha_fin_estimada);
+                    const dias = Math.ceil((fechaFin - hoy) / (1000 * 60 * 60 * 24));
+                    
+                    let claseDias = '';
+                    if (dias < 0) claseDias = 'badge Completado';
+                    else if (dias <= 7) claseDias = 'badge Urgente';
+                    else if (dias <= 15) claseDias = 'badge Pendiente';
+                    
+                    return `
+                        <tr>
+                            <td>${p.nombre}</td>
+                            <td>${fechaFin.toLocaleDateString('es-ES')}</td>
+                            <td><span class="${claseDias}">${dias < 0 ? 'Vencido' : dias + ' días'}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Error cargando vencimientos:', error);
+            }
+        }
+        
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
         }
         
         function logout() {
@@ -432,11 +574,17 @@
             window.location.href = 'index.html';
         }
         
+        function verProyecto(id) {
+            alert('Ver proyecto: ' + id);
+        }
+        
         // Inicializar
-        verificarSesion();
-        cargarDashboard();
-        actualizarFecha();
-        setInterval(actualizarFecha, 60000);
+        if (verificarSesion()) {
+            actualizarFecha();
+            cargarEstadisticas();
+            cargarProyectos();
+            cargarVencimientos();
+        }
     </script>
 </body>
 </html>
