@@ -1,20 +1,161 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="utf-8">
-    <title>Redirigiendo...</title>
-    <script>
-        // Obtener la ruta solicitada
-        const path = window.location.pathname;
-        const repoName = '/erp-cuba'; // Cambia esto por el nombre de tu repositorio
-        
-        // Si no es un archivo real, redirigir al index
-        if (!path.includes('.')) {
-            window.location.href = repoName + '/index.html?ruta=' + encodeURIComponent(path);
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirigiendo - ERP Cuba</title>
+    <link rel="stylesheet" href="css/estilo.css">
+    <style>
+        .redirect-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a5276 0%, #2980b9 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
         }
+        
+        .redirect-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            max-width: 400px;
+        }
+        
+        .redirect-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .redirect-card h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .redirect-card p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .loading-bar {
+            width: 100%;
+            height: 4px;
+            background: #eee;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .loading-progress {
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            animation: loading 2s ease-in-out;
+        }
+        
+        @keyframes loading {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+        
+        .manual-link {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .manual-link a {
+            color: var(--secondary);
+            text-decoration: none;
+        }
+        
+        .manual-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <script>
+        // ============================================
+        // REDIRECCIÓN PARA GITHUB PAGES (SPA)
+        // ============================================
+        
+        (function() {
+            // Obtener la ruta solicitada
+            const path = window.location.pathname;
+            const repoName = '/erp-cuba'; // Cambiar si tu repositorio tiene otro nombre
+            
+            // Mapeo de rutas a archivos HTML
+            const routes = {
+                '/': 'index.html',
+                '/dashboard': 'dashboard.html',
+                '/clientes': 'clientes.html',
+                '/trabajadores': 'trabajadores.html',
+                '/proyectos': 'proyectos.html',
+                '/login': 'index.html',
+                '/registro': 'index.html?registro=true'
+            };
+            
+            // Limpiar la ruta (quitar el nombre del repositorio)
+            let cleanPath = path.replace(repoName, '');
+            if (cleanPath === '') cleanPath = '/';
+            
+            // Verificar si es un archivo estático (tiene extensión)
+            const isStaticFile = /\.[a-zA-Z0-9]+$/.test(cleanPath);
+            
+            if (isStaticFile) {
+                // Es un archivo real, no redirigir
+                document.write('<div class="redirect-container"><div class="redirect-card">');
+                document.write('<div class="redirect-icon">📄</div>');
+                document.write('<h2>Archivo no encontrado</h2>');
+                document.write('<p>El archivo solicitado no existe en el servidor.</p>');
+                document.write('<div class="manual-link"><a href="' + repoName + '/">Volver al inicio</a></div>');
+                document.write('</div></div>');
+                return;
+            }
+            
+            // Buscar la ruta en el mapeo
+            let targetFile = routes[cleanPath];
+            
+            if (!targetFile) {
+                // Si no está en el mapeo, buscar página personalizada o ir al index
+                const possibleFile = cleanPath.replace(/^\//, '').replace(/\/$/, '');
+                
+                // Verificar si es una de nuestras páginas principales
+                const mainPages = ['dashboard', 'clientes', 'trabajadores', 'proyectos'];
+                if (mainPages.includes(possibleFile)) {
+                    targetFile = possibleFile + '.html';
+                } else {
+                    // Redirigir al index con parámetro de ruta
+                    targetFile = 'index.html?ruta=' + encodeURIComponent(cleanPath);
+                }
+            }
+            
+            // Construir URL completa
+            const baseUrl = window.location.origin + repoName;
+            const redirectUrl = baseUrl + '/' + targetFile;
+            
+            // Mostrar mensaje de redirección
+            document.write('<div class="redirect-container">');
+            document.write('<div class="redirect-card">');
+            document.write('<div class="redirect-icon">🇨🇺🏗️</div>');
+            document.write('<h2>ERP Cuba</h2>');
+            document.write('<p>Redirigiendo a la página solicitada...</p>');
+            document.write('<div class="loading-bar"><div class="loading-progress"></div></div>');
+            document.write('<p style="font-size: 14px;">' + cleanPath + '</p>');
+            document.write('<div class="manual-link">');
+            document.write('Si no eres redirigido automáticamente, ');
+            document.write('<a href="' + redirectUrl + '">haz clic aquí</a>');
+            document.write('</div>');
+            document.write('</div></div>');
+            
+            // Redirigir después de un breve retraso
+            setTimeout(function() {
+                window.location.href = redirectUrl;
+            }, 1500);
+        })();
     </script>
 </head>
 <body>
-    <p>Redirigiendo a la aplicación...</p>
+    <!-- El contenido se genera dinámicamente con JavaScript -->
 </body>
 </html>
