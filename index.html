@@ -172,13 +172,11 @@
                 <p class="subtitulo">Proyecto Bernal • Ke Proyecto</p>
             </div>
             
-            <!-- Pestañas -->
             <div class="tabs">
                 <button class="tab-btn active" id="tabLogin" onclick="mostrarLogin()">🔐 INICIAR SESIÓN</button>
                 <button class="tab-btn" id="tabRegistro" onclick="mostrarRegistro()">📝 CREAR CUENTA</button>
             </div>
             
-            <!-- Formulario de Login -->
             <form id="loginForm" onsubmit="return false;">
                 <div class="form-group">
                     <label>📧 Correo Electrónico</label>
@@ -203,7 +201,6 @@
                 <div id="mensajeLogin" class="mensaje"></div>
             </form>
             
-            <!-- Formulario de Registro -->
             <form id="registroForm" class="hidden" onsubmit="return false;">
                 <div class="form-group">
                     <label>👤 Nombre Completo</label>
@@ -255,11 +252,10 @@
 
     <script>
         // Configuración de Supabase
-        const SUPABASE_URL = 'https://TU_PROJECT_URL.supabase.co';
-        const SUPABASE_KEY = 'TU_ANON_KEY';
+        const SUPABASE_URL = 'https://kmsqhldejyxyqtfrmvov.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imttc3FobGRlanl4eXF0ZnJtdm92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMzM4MDMsImV4cCI6MjA5MTYwOTgwM30.V8Ec5fAk22VPS1a2bBh0rAWiNcWt6Y6dBzgTAK8ImZs';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Mostrar/Ocultar formularios
         function mostrarLogin() {
             document.getElementById('loginForm').classList.remove('hidden');
             document.getElementById('registroForm').classList.add('hidden');
@@ -278,7 +274,6 @@
             document.getElementById('mensajeRegistro').textContent = '';
         }
 
-        // Login
         async function login() {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
@@ -293,7 +288,6 @@
             
             try {
                 const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                
                 if (error) throw error;
                 
                 const { data: perfil } = await supabase
@@ -329,7 +323,6 @@
             }
         }
 
-        // Registro
         async function registrar() {
             const nombre = document.getElementById('regNombre').value.trim();
             const email = document.getElementById('regEmail').value.trim();
@@ -387,7 +380,7 @@
                     activo: true
                 });
                 
-                mensaje.textContent = '✅ ¡Cuenta creada! Redirigiendo...';
+                mensaje.textContent = '✅ ¡Cuenta creada! Ahora puedes iniciar sesión';
                 mensaje.className = 'mensaje success';
                 
                 setTimeout(() => {
@@ -400,7 +393,6 @@
             }
         }
 
-        // Cargar credenciales guardadas
         window.addEventListener('DOMContentLoaded', () => {
             const saved = localStorage.getItem('erp_session');
             if (saved) {
