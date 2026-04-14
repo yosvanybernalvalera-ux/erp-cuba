@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP Cuba - Acceso</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a5276 0%, #2980b9 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 480px;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .login-header h1 {
+            color: #1a5276;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .subtitulo {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            color: #1a5276;
+            border-bottom-color: #1a5276;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 15px;
+            background: #fafafa;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2980b9;
+            background: white;
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: #1a5276;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .btn-registro {
+            background: #27ae60;
+        }
+        
+        .mensaje {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .mensaje.error {
+            background: #fadbd8;
+            color: #c0392b;
+        }
+        
+        .mensaje.success {
+            background: #d5f5e3;
+            color: #27ae60;
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #888;
+            font-size: 12px;
+        }
+        
+        small {
+            display: block;
+            margin-top: 5px;
+            color: #888;
+            font-size: 12px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo-icon">🇨🇺🏗️</div>
+                <h1>ERP Empresarial Cuba</h1>
+                <p class="subtitulo">Proyecto Bernal • Ke Proyecto</p>
+            </div>
+            
+            <!-- Pestañas -->
+            <div class="tabs">
+                <button class="tab-btn active" id="tabLogin" onclick="mostrarLogin()">🔐 INICIAR SESIÓN</button>
+                <button class="tab-btn" id="tabRegistro" onclick="mostrarRegistro()">📝 CREAR CUENTA</button>
+            </div>
+            
+            <!-- Formulario de Login -->
+            <form id="loginForm" onsubmit="return false;">
+                <div class="form-group">
+                    <label>📧 Correo Electrónico</label>
+                    <input type="email" id="loginEmail" placeholder="tu@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>🔒 Contraseña</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="recordar"> Recordar sesión
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn-login" onclick="login()">
+                    🚀 INICIAR SESIÓN
+                </button>
+                
+                <div id="mensajeLogin" class="mensaje"></div>
+            </form>
+            
+            <!-- Formulario de Registro -->
+            <form id="registroForm" class="hidden" onsubmit="return false;">
+                <div class="form-group">
+                    <label>👤 Nombre Completo</label>
+                    <input type="text" id="regNombre" placeholder="Ej: Juan Pérez García" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>📧 Correo Electrónico</label>
+                    <input type="email" id="regEmail" placeholder="tu@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>📱 Teléfono</label>
+                    <input type="tel" id="regTelefono" placeholder="+5351234567" required>
+                    <small>Ejemplo: +5351234567 (móvil) o +5371234567 (fijo)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>🏢 Seleccionar Proyecto</label>
+                    <select id="regProyecto" required>
+                        <option value="">Selecciona un proyecto...</option>
+                        <option value="Proyecto Bernal">Proyecto Bernal</option>
+                        <option value="Ke Proyecto">Ke Proyecto</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>🔒 Contraseña</label>
+                    <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>🔒 Confirmar Contraseña</label>
+                    <input type="password" id="regConfirmPassword" placeholder="Repite la contraseña" required>
+                </div>
+                
+                <button type="submit" class="btn-login btn-registro" onclick="registrar()">
+                    ✅ CREAR CUENTA GRATIS
+                </button>
+                
+                <div id="mensajeRegistro" class="mensaje"></div>
+            </form>
+            
+            <div class="login-footer">
+                <p>🇨🇺 Hecho en Cuba • Sin costo • Datos seguros</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de Supabase
+        const SUPABASE_URL = 'https://TU_PROJECT_URL.supabase.co';
+        const SUPABASE_KEY = 'TU_ANON_KEY';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Mostrar/Ocultar formularios
+        function mostrarLogin() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registroForm').classList.add('hidden');
+            document.getElementById('tabLogin').classList.add('active');
+            document.getElementById('tabRegistro').classList.remove('active');
+            document.getElementById('mensajeLogin').textContent = '';
+            document.getElementById('mensajeRegistro').textContent = '';
+        }
+
+        function mostrarRegistro() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registroForm').classList.remove('hidden');
+            document.getElementById('tabRegistro').classList.add('active');
+            document.getElementById('tabLogin').classList.remove('active');
+            document.getElementById('mensajeLogin').textContent = '';
+            document.getElementById('mensajeRegistro').textContent = '';
+        }
+
+        // Login
+        async function login() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const recordar = document.getElementById('recordar').checked;
+            const mensaje = document.getElementById('mensajeLogin');
+            
+            if (!email || !password) {
+                mensaje.textContent = '❌ Completa todos los campos';
+                mensaje.className = 'mensaje error';
+                return;
+            }
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                
+                if (error) throw error;
+                
+                const { data: perfil } = await supabase
+                    .from('perfiles')
+                    .select('*')
+                    .eq('email', email)
+                    .single();
+                
+                if (perfil) {
+                    const sessionData = {
+                        email: perfil.email,
+                        nombre: perfil.nombre_completo,
+                        proyecto: perfil.proyecto_asignado,
+                        rol: perfil.rol
+                    };
+                    
+                    if (recordar) {
+                        localStorage.setItem('erp_session', JSON.stringify(sessionData));
+                    } else {
+                        sessionStorage.setItem('erp_session', JSON.stringify(sessionData));
+                    }
+                    
+                    mensaje.textContent = '✅ ¡Bienvenido! Redirigiendo...';
+                    mensaje.className = 'mensaje success';
+                    
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                }
+            } catch (error) {
+                mensaje.textContent = '❌ Email o contraseña incorrectos';
+                mensaje.className = 'mensaje error';
+            }
+        }
+
+        // Registro
+        async function registrar() {
+            const nombre = document.getElementById('regNombre').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const telefono = document.getElementById('regTelefono').value.trim();
+            const proyecto = document.getElementById('regProyecto').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const mensaje = document.getElementById('mensajeRegistro');
+            
+            if (!nombre || !email || !telefono || !proyecto || !password) {
+                mensaje.textContent = '❌ Completa todos los campos';
+                mensaje.className = 'mensaje error';
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                mensaje.textContent = '❌ Las contraseñas no coinciden';
+                mensaje.className = 'mensaje error';
+                return;
+            }
+            
+            if (password.length < 6) {
+                mensaje.textContent = '❌ La contraseña debe tener al menos 6 caracteres';
+                mensaje.className = 'mensaje error';
+                return;
+            }
+            
+            try {
+                const { data: existe } = await supabase
+                    .from('perfiles')
+                    .select('id')
+                    .eq('email', email)
+                    .single();
+                
+                if (existe) {
+                    mensaje.textContent = '❌ Este email ya está registrado';
+                    mensaje.className = 'mensaje error';
+                    return;
+                }
+                
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: email,
+                    password: password
+                });
+                
+                if (authError) throw authError;
+                
+                await supabase.from('perfiles').insert({
+                    id: authData.user.id,
+                    email: email,
+                    telefono: telefono,
+                    nombre_completo: nombre,
+                    proyecto_asignado: proyecto,
+                    rol: 'Usuario',
+                    activo: true
+                });
+                
+                mensaje.textContent = '✅ ¡Cuenta creada! Redirigiendo...';
+                mensaje.className = 'mensaje success';
+                
+                setTimeout(() => {
+                    mostrarLogin();
+                }, 2000);
+                
+            } catch (error) {
+                mensaje.textContent = '❌ Error al crear la cuenta';
+                mensaje.className = 'mensaje error';
+            }
+        }
+
+        // Cargar credenciales guardadas
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('erp_session');
+            if (saved) {
+                try {
+                    const session = JSON.parse(saved);
+                    document.getElementById('loginEmail').value = session.email;
+                    document.getElementById('recordar').checked = true;
+                } catch (e) {}
+            }
+        });
+    </script>
+</body>
+</html>
