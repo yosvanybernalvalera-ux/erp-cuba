@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes - ERP Cuba</title>
+    <link rel="stylesheet" href="css/estilo.css">
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="app-container" id="appContainer">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 id="proyectoNombre">🇨🇺 Cargando...</h2>
+                <p id="userNombre"></p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+                <a href="clientes.html" class="nav-item active">
+                    <span class="icon">👥</span> Clientes
+                </a>
+                <a href="trabajadores.html" class="nav-item">
+                    <span class="icon">👷</span> Trabajadores
+                </a>
+                <a href="proyectos.html" class="nav-item">
+                    <span class="icon">🏗️</span> Proyectos
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button class="btn-logout" onclick="logout()">🚪 Cerrar Sesión</button>
+            </div>
+        </aside>
+        
+        <!-- Contenido Principal -->
+        <main class="main-content" id="mainContent">
+            <header class="top-bar">
+                <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                <h1>👥 Gestión de Clientes</h1>
+                <div class="user-info">
+                    <button class="btn-primary" onclick="abrirModalNuevoCliente()">➕ Nuevo Cliente</button>
+                </div>
+            </header>
+            
+            <!-- Barra de búsqueda -->
+            <div class="search-bar">
+                <input type="text" id="busquedaCliente" placeholder="🔍 Buscar por nombre, CI, teléfono..." onkeyup="filtrarClientes()">
+                <select id="filtroProvincia" onchange="filtrarClientes()">
+                    <option value="">Todas las provincias</option>
+                </select>
+            </div>
+            
+            <!-- Tabla de Clientes -->
+            <div class="recent-section">
+                <div class="table-container">
+                    <table id="tablaClientes">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Carnet Identidad</th>
+                                <th>Teléfono</th>
+                                <th>Email</th>
+                                <th>Municipio/Provincia</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientesBody">
+                            <tr><td colspan="7" style="text-align: center;">Cargando clientes...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal para Nuevo/Editar Cliente -->
+    <div class="modal" id="modalCliente">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitulo">➕ Nuevo Cliente</h2>
+                <button class="modal-close" onclick="cerrarModalCliente()">&times;</button>
+            </div>
+            
+            <form id="formCliente" onsubmit="event.preventDefault(); guardarCliente();">
+                <input type="hidden" id="clienteId">
+                
+                <div class="form-group">
+                    <label>👤 Nombre Completo / Empresa *</label>
+                    <input type="text" id="clienteNombre" placeholder="Ej: Constructora La Habana" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>🆔 Carnet de Identidad</label>
+                    <input type="text" id="clienteCI" placeholder="Ej: 80010112345">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>📱 Teléfono</label>
+                        <input type="tel" id="clienteTelefono" placeholder="+5351234567">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📧 Email</label>
+                        <input type="email" id="clienteEmail" placeholder="cliente@email.com">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>📍 Provincia</label>
+                        <select id="clienteProvincia" onchange="cargarMunicipios()">
+                            <option value="">Seleccionar provincia</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>🏘️ Municipio</label>
+                        <select id="clienteMunicipio">
+                            <option value="">Seleccionar municipio</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>📝 Dirección</label>
+                    <input type="text" id="clienteDireccion" placeholder="Calle, número, entre calles...">
+                </div>
+                
+                <div class="form-group">
+                    <label>📋 Notas</label>
+                    <textarea id="clienteNotas" rows="3" placeholder="Información adicional..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="clienteActivo" checked> Cliente Activo
+                    </label>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="cerrarModalCliente()">Cancelar</button>
+                    <button type="submit" class="btn-primary">💾 Guardar Cliente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // GESTIÓN DE CLIENTES - ERP CUBA
+        // ============================================
+        
+        const SUPABASE_URL = 'https://TU_PROJECT_URL.supabase.co';
+        const SUPABASE_KEY = 'TU_ANON_KEY';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let currentUser = null;
+        let clientesLista = [];
+        
+        // Provincias de Cuba
+        const provinciasCuba = [
+            'Pinar del Río', 'Artemisa', 'La Habana', 'Mayabeque', 'Matanzas',
+            'Cienfuegos', 'Villa Clara', 'Sancti Spíritus', 'Ciego de Ávila',
+            'Camagüey', 'Las Tunas', 'Holguín', 'Granma', 'Santiago de Cuba',
+            'Guantánamo', 'Isla de la Juventud'
+        ];
+        
+        // ===== INICIALIZAR =====
+        function inicializar() {
+            verificarSesion();
+            cargarProvincias();
+            cargarClientes();
+        }
+        
+        function verificarSesion() {
+            const session = localStorage.getItem('erp_session') || sessionStorage.getItem('erp_session');
+            
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            try {
+                currentUser = JSON.parse(session);
+                document.getElementById('proyectoNombre').textContent = currentUser.proyecto;
+                document.getElementById('userNombre').textContent = currentUser.nombre;
+                
+                const container = document.getElementById('appContainer');
+                if (currentUser.proyecto === 'Proyecto Bernal') {
+                    container.classList.add('proyecto-bernal');
+                } else {
+                    container.classList.add('proyecto-ke');
+                }
+            } catch (e) {
+                window.location.href = 'index.html';
+            }
+        }
+        
+        function cargarProvincias() {
+            const selectProvincia = document.getElementById('clienteProvincia');
+            const filtroProvincia = document.getElementById('filtroProvincia');
+            
+            provinciasCuba.forEach(provincia => {
+                const option1 = document.createElement('option');
+                option1.value = provincia;
+                option1.textContent = provincia;
+                selectProvincia.appendChild(option1);
+                
+                const option2 = document.createElement('option');
+                option2.value = provincia;
+                option2.textContent = provincia;
+                filtroProvincia.appendChild(option2);
+            });
+        }
+        
+        // ===== CARGAR CLIENTES =====
+        async function cargarClientes() {
+            try {
+                const { data, error } = await supabase
+                    .from('clientes')
+                    .select('*')
+                    .eq('proyecto', currentUser.proyecto)
+                    .order('nombre', { ascending: true });
+                
+                if (error) throw error;
+                
+                clientesLista = data || [];
+                mostrarClientes(clientesLista);
+                
+            } catch (error) {
+                console.error('Error cargando clientes:', error);
+                document.getElementById('clientesBody').innerHTML = 
+                    '<tr><td colspan="7" style="text-align: center; color: red;">Error al cargar clientes</td></tr>';
+            }
+        }
+        
+        function mostrarClientes(clientes) {
+            const tbody = document.getElementById('clientesBody');
+            
+            if (!clientes || clientes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay clientes registrados</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = clientes.map(cliente => `
+                <tr>
+                    <td><strong>${cliente.nombre || ''}</strong></td>
+                    <td>${cliente.carnet_identidad || '-'}</td>
+                    <td>${cliente.telefono || '-'}</td>
+                    <td>${cliente.email || '-'}</td>
+                    <td>${cliente.municipio || ''} ${cliente.provincia ? ', ' + cliente.provincia : ''}</td>
+                    <td>
+                        <span class="badge ${cliente.activo ? 'activo' : 'inactivo'}">
+                            ${cliente.activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-icon" onclick="editarCliente('${cliente.id}')" title="Editar">✏️</button>
+                        <button class="btn-icon" onclick="toggleEstadoCliente('${cliente.id}', ${cliente.activo})" title="${cliente.activo ? 'Desactivar' : 'Activar'}">
+                            ${cliente.activo ? '🔴' : '🟢'}
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // ===== FILTRAR CLIENTES =====
+        function filtrarClientes() {
+            const busqueda = document.getElementById('busquedaCliente').value.toLowerCase();
+            const provincia = document.getElementById('filtroProvincia').value;
+            
+            const filtrados = clientesLista.filter(cliente => {
+                const coincideBusqueda = !busqueda || 
+                    (cliente.nombre && cliente.nombre.toLowerCase().includes(busqueda)) ||
+                    (cliente.carnet_identidad && cliente.carnet_identidad.includes(busqueda)) ||
+                    (cliente.telefono && cliente.telefono.includes(busqueda));
+                
+                const coincideProvincia = !provincia || cliente.provincia === provincia;
+                
+                return coincideBusqueda && coincideProvincia;
+            });
+            
+            mostrarClientes(filtrados);
+        }
+        
+        // ===== MODAL NUEVO CLIENTE =====
+        function abrirModalNuevoCliente() {
+            document.getElementById('modalTitulo').textContent = '➕ Nuevo Cliente';
+            document.getElementById('formCliente').reset();
+            document.getElementById('clienteId').value = '';
+            document.getElementById('modalCliente').classList.add('active');
+        }
+        
+        function cerrarModalCliente() {
+            document.getElementById('modalCliente').classList.remove('active');
+        }
+        
+        // ===== EDITAR CLIENTE =====
+        async function editarCliente(id) {
+            try {
+                const { data, error } = await supabase
+                    .from('clientes')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+                
+                if (error) throw error;
+                
+                document.getElementById('modalTitulo').textContent = '✏️ Editar Cliente';
+                document.getElementById('clienteId').value = data.id;
+                document.getElementById('clienteNombre').value = data.nombre || '';
+                document.getElementById('clienteCI').value = data.carnet_identidad || '';
+                document.getElementById('clienteTelefono').value = data.telefono || '';
+                document.getElementById('clienteEmail').value = data.email || '';
+                document.getElementById('clienteProvincia').value = data.provincia || '';
+                document.getElementById('clienteDireccion').value = data.direccion || '';
+                document.getElementById('clienteNotas').value = data.notas || '';
+                document.getElementById('clienteActivo').checked = data.activo;
+                
+                if (data.provincia) {
+                    cargarMunicipios();
+                    document.getElementById('clienteMunicipio').value = data.municipio || '';
+                }
+                
+                document.getElementById('modalCliente').classList.add('active');
+                
+            } catch (error) {
+                console.error('Error cargando cliente:', error);
+                alert('Error al cargar los datos del cliente');
+            }
+        }
+        
+        // ===== GUARDAR CLIENTE =====
+        async function guardarCliente() {
+            const id = document.getElementById('clienteId').value;
+            
+            const clienteData = {
+                proyecto: currentUser.proyecto,
+                nombre: document.getElementById('clienteNombre').value,
+                carnet_identidad: document.getElementById('clienteCI').value || null,
+                telefono: document.getElementById('clienteTelefono').value || null,
+                email: document.getElementById('clienteEmail').value || null,
+                provincia: document.getElementById('clienteProvincia').value || null,
+                municipio: document.getElementById('clienteMunicipio').value || null,
+                direccion: document.getElementById('clienteDireccion').value || null,
+                notas: document.getElementById('clienteNotas').value || null,
+                activo: document.getElementById('clienteActivo').checked,
+                updated_at: new Date()
+            };
+            
+            try {
+                let result;
+                
+                if (id) {
+                    result = await supabase
+                        .from('clientes')
+                        .update(clienteData)
+                        .eq('id', id);
+                } else {
+                    result = await supabase
+                        .from('clientes')
+                        .insert([clienteData]);
+                }
+                
+                if (result.error) throw result.error;
+                
+                cerrarModalCliente();
+                cargarClientes();
+                alert('✅ Cliente guardado exitosamente');
+                
+            } catch (error) {
+                console.error('Error guardando cliente:', error);
+                alert('❌ Error al guardar el cliente');
+            }
+        }
+        
+        // ===== CAMBIAR ESTADO =====
+        async function toggleEstadoCliente(id, estadoActual) {
+            const nuevoEstado = !estadoActual;
+            const accion = nuevoEstado ? 'activar' : 'desactivar';
+            
+            if (!confirm(`¿Estás seguro de ${accion} este cliente?`)) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('clientes')
+                    .update({ activo: nuevoEstado, updated_at: new Date() })
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                cargarClientes();
+                
+            } catch (error) {
+                console.error('Error cambiando estado:', error);
+                alert('Error al cambiar el estado del cliente');
+            }
+        }
+        
+        function cargarMunicipios() {
+            // Función placeholder - se puede expandir con datos reales
+            console.log('Cargar municipios para la provincia seleccionada');
+        }
+        
+        function logout() {
+            localStorage.removeItem('erp_session');
+            sessionStorage.removeItem('erp_session');
+            window.location.href = 'index.html';
+        }
+        
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('closed');
+            document.getElementById('mainContent').classList.toggle('expanded');
+        }
+        
+        // Inicializar al cargar
+        inicializar();
+    </script>
+</body>
+</html>
