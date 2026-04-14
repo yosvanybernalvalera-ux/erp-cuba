@@ -1,0 +1,19 @@
+# Configuración para GitHub Pages
+title: ERP Cuba
+description: Sistema de gestión empresarial para Cuba
+theme: jekyll-theme-minimal
+
+# Compresión y optimización
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+  startings: []
+  blanklines: false
+
+# Excluir archivos innecesarios
+exclude:
+  - .gitignore
+  - README.md
+  - package.json
+  - node_modules
