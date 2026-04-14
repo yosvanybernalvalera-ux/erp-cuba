@@ -231,6 +231,9 @@
         .badge.En.Progreso { background: #d6eaf8; color: #2980b9; }
         .badge.Completado { background: #d5f5e3; color: #27ae60; }
         .badge.Urgente { background: #fadbd8; color: #c0392b; }
+        .badge.Baja { background: #d5f5e3; color: #27ae60; }
+        .badge.Media { background: #fdebd0; color: #f39c12; }
+        .badge.Alta { background: #fadbd8; color: #e74c3c; }
         
         .btn-primary {
             background: var(--primary);
@@ -283,7 +286,6 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h2 id="proyectoNombre">🇨🇺 Cargando...</h2>
@@ -310,7 +312,6 @@
             </div>
         </aside>
         
-        <!-- Contenido Principal -->
         <main class="main-content" id="mainContent">
             <header class="top-bar">
                 <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
@@ -320,7 +321,6 @@
                 </div>
             </header>
             
-            <!-- Tarjetas de Resumen -->
             <div class="dashboard-grid">
                 <div class="stat-card">
                     <div class="stat-icon">🏗️</div>
@@ -355,7 +355,6 @@
                 </div>
             </div>
             
-            <!-- Proyectos Recientes -->
             <div class="recent-section">
                 <h2>📋 Proyectos en Curso</h2>
                 <div class="table-container">
@@ -377,7 +376,6 @@
                 </div>
             </div>
             
-            <!-- Próximos Vencimientos -->
             <div class="recent-section">
                 <h2>⏰ Próximos Vencimientos</h2>
                 <div class="table-container">
@@ -399,14 +397,13 @@
     </div>
 
     <script>
-        // Configuración
-        const SUPABASE_URL = 'https://TU_PROJECT_URL.supabase.co';
-        const SUPABASE_KEY = 'TU_ANON_KEY';
+        // Configuración de Supabase
+        const SUPABASE_URL = 'https://kmsqhldejyxyqtfrmvov.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imttc3FobGRlanl4eXF0ZnJtdm92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMzM4MDMsImV4cCI6MjA5MTYwOTgwM30.V8Ec5fAk22VPS1a2bBh0rAWiNcWt6Y6dBzgTAK8ImZs';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
         let currentUser = null;
         
-        // Verificar sesión
         function verificarSesion() {
             const session = localStorage.getItem('erp_session') || sessionStorage.getItem('erp_session');
             
@@ -426,19 +423,16 @@
             }
         }
         
-        // Actualizar fecha
         function actualizarFecha() {
             const ahora = new Date();
             const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('fechaActual').textContent = ahora.toLocaleDateString('es-ES', opciones);
         }
         
-        // Cargar estadísticas
         async function cargarEstadisticas() {
             try {
                 const proyecto = currentUser.proyecto;
                 
-                // Proyectos activos
                 const { count: proyectosActivos } = await supabase
                     .from('proyectos')
                     .select('*', { count: 'exact', head: true })
@@ -447,7 +441,6 @@
                 
                 document.getElementById('totalProyectos').textContent = proyectosActivos || 0;
                 
-                // Clientes
                 const { count: clientes } = await supabase
                     .from('clientes')
                     .select('*', { count: 'exact', head: true })
@@ -456,7 +449,6 @@
                 
                 document.getElementById('totalClientes').textContent = clientes || 0;
                 
-                // Trabajadores
                 const { count: trabajadores } = await supabase
                     .from('trabajadores')
                     .select('*', { count: 'exact', head: true })
@@ -465,7 +457,6 @@
                 
                 document.getElementById('totalTrabajadores').textContent = trabajadores || 0;
                 
-                // Presupuesto total
                 const { data: presupuestos } = await supabase
                     .from('proyectos')
                     .select('presupuesto_cup')
@@ -480,7 +471,6 @@
             }
         }
         
-        // Cargar proyectos
         async function cargarProyectos() {
             try {
                 const { data, error } = await supabase
@@ -518,7 +508,6 @@
             }
         }
         
-        // Cargar vencimientos
         async function cargarVencimientos() {
             try {
                 const { data, error } = await supabase
@@ -575,10 +564,9 @@
         }
         
         function verProyecto(id) {
-            alert('Ver proyecto: ' + id);
+            window.location.href = 'proyectos.html?id=' + id;
         }
         
-        // Inicializar
         if (verificarSesion()) {
             actualizarFecha();
             cargarEstadisticas();
