@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Redirigiendo...</title>
+    <script>
+        // Obtener la ruta solicitada
+        const path = window.location.pathname;
+        const repoName = '/erp-cuba'; // Cambia esto por el nombre de tu repositorio
+        
+        // Si no es un archivo real, redirigir al index
+        if (!path.includes('.')) {
+            window.location.href = repoName + '/index.html?ruta=' + encodeURIComponent(path);
+        }
+    </script>
+</head>
+<body>
+    <p>Redirigiendo a la aplicación...</p>
+</body>
+</html>
