@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -156,10 +155,6 @@
             color: #888;
             font-size: 12px;
         }
-        
-        .hidden {
-            display: none;
-        }
     </style>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -173,11 +168,13 @@
                 <p class="subtitulo">Proyecto Bernal • Ke Proyecto</p>
             </div>
             
+            <!-- Pestañas -->
             <div class="tabs">
                 <button class="tab-btn active" id="tabLogin" onclick="mostrarLogin()">🔐 INICIAR SESIÓN</button>
                 <button class="tab-btn" id="tabRegistro" onclick="mostrarRegistro()">📝 CREAR CUENTA</button>
             </div>
             
+            <!-- Formulario de Login -->
             <form id="loginForm" onsubmit="return false;">
                 <div class="form-group">
                     <label>📧 Correo Electrónico</label>
@@ -202,7 +199,8 @@
                 <div id="mensajeLogin" class="mensaje"></div>
             </form>
             
-            <form id="registroForm" class="hidden" onsubmit="return false;">
+            <!-- Formulario de Registro -->
+            <form id="registroForm" style="display: none;" onsubmit="return false;">
                 <div class="form-group">
                     <label>👤 Nombre Completo</label>
                     <input type="text" id="regNombre" placeholder="Ej: Juan Pérez García" required>
@@ -257,24 +255,34 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imttc3FobGRlanl4eXF0ZnJtdm92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMzM4MDMsImV4cCI6MjA5MTYwOTgwM30.V8Ec5fAk22VPS1a2bBh0rAWiNcWt6Y6dBzgTAK8ImZs';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Mostrar/Ocultar formularios
         function mostrarLogin() {
-            document.getElementById('loginForm').classList.remove('hidden');
-            document.getElementById('registroForm').classList.add('hidden');
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registroForm').style.display = 'none';
             document.getElementById('tabLogin').classList.add('active');
             document.getElementById('tabRegistro').classList.remove('active');
+            document.getElementById('tabLogin').style.color = '#1a5276';
+            document.getElementById('tabLogin').style.borderBottomColor = '#1a5276';
+            document.getElementById('tabRegistro').style.color = '#999';
+            document.getElementById('tabRegistro').style.borderBottomColor = 'transparent';
             document.getElementById('mensajeLogin').textContent = '';
             document.getElementById('mensajeRegistro').textContent = '';
         }
 
         function mostrarRegistro() {
-            document.getElementById('loginForm').classList.add('hidden');
-            document.getElementById('registroForm').classList.remove('hidden');
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registroForm').style.display = 'block';
             document.getElementById('tabRegistro').classList.add('active');
             document.getElementById('tabLogin').classList.remove('active');
+            document.getElementById('tabRegistro').style.color = '#27ae60';
+            document.getElementById('tabRegistro').style.borderBottomColor = '#27ae60';
+            document.getElementById('tabLogin').style.color = '#999';
+            document.getElementById('tabLogin').style.borderBottomColor = 'transparent';
             document.getElementById('mensajeLogin').textContent = '';
             document.getElementById('mensajeRegistro').textContent = '';
         }
 
+        // Login
         async function login() {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
@@ -289,6 +297,7 @@
             
             try {
                 const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                
                 if (error) throw error;
                 
                 const { data: perfil } = await supabase
@@ -324,6 +333,7 @@
             }
         }
 
+        // Registro
         async function registrar() {
             const nombre = document.getElementById('regNombre').value.trim();
             const email = document.getElementById('regEmail').value.trim();
@@ -386,6 +396,7 @@
                 
                 setTimeout(() => {
                     mostrarLogin();
+                    document.getElementById('loginEmail').value = email;
                 }, 2000);
                 
             } catch (error) {
@@ -394,6 +405,7 @@
             }
         }
 
+        // Cargar credenciales guardadas
         window.addEventListener('DOMContentLoaded', () => {
             const saved = localStorage.getItem('erp_session');
             if (saved) {
