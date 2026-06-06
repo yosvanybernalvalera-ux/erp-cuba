@@ -6,127 +6,204 @@
     <title>Crear Cuenta - ERP Cuba</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #27ae60 0%, #1a5276 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .login-container { width: 100%; max-width: 450px; }
-        .login-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-        .login-header { text-align: center; margin-bottom: 25px; }
-        .logo-icon { font-size: 48px; }
-        h2 { color: #27ae60; margin: 10px 0; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
-        .form-group input, .form-group select { width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 10px; font-size: 15px; }
-        .btn { width: 100%; padding: 16px; background: #27ae60; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .mensaje { margin-top: 15px; padding: 12px; border-radius: 8px; text-align: center; }
-        .mensaje.error { background: #fadbd8; color: #c0392b; }
-        .mensaje.success { background: #d5f5e3; color: #27ae60; }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background: linear-gradient(135deg, #27ae60 0%, #1a5276 100%); 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px; 
+        }
+        .container { width: 100%; max-width: 450px; }
+        .card { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 30px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
+        }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h2 { color: #27ae60; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; }
+        .form-group input, .form-group select { 
+            width: 100%; 
+            padding: 13px; 
+            border: 2px solid #ddd; 
+            border-radius: 10px; 
+            font-size: 15px; 
+        }
+        .btn { 
+            width: 100%; 
+            padding: 15px; 
+            background: #27ae60; 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 17px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-top: 10px;
+        }
+        .btn:active { background: #1e8449; }
+        .mensaje { margin-top: 15px; padding: 12px; border-radius: 8px; text-align: center; font-size: 14px; }
+        .error { background: #fadbd8; color: #c0392b; }
+        .success { background: #d5f5e3; color: #27ae60; }
+        .info { background: #d6eaf8; color: #2980b9; }
         .volver { text-align: center; margin-top: 15px; }
-        .volver a { color: #2980b9; text-decoration: none; }
-        small { display: block; margin-top: 5px; color: #888; font-size: 12px; }
+        .volver a { color: #2980b9; text-decoration: none; font-size: 14px; }
+        small { display: block; margin-top: 4px; color: #888; font-size: 11px; }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <div class="logo-icon">📝</div>
-                <h2>Crear Cuenta</h2>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h2>📝 Crear Cuenta</h2>
+                <p style="color: #666; font-size: 14px;">Proyecto Bernal • Ke Proyecto</p>
             </div>
             
             <div class="form-group">
                 <label>👤 Nombre Completo</label>
-                <input type="text" id="nombre" placeholder="Ej: Juan Pérez">
+                <input type="text" id="nombre" placeholder="Ej: Juan Pérez García">
             </div>
+            
             <div class="form-group">
                 <label>📧 Correo Electrónico</label>
                 <input type="email" id="email" placeholder="tu@email.com">
             </div>
+            
             <div class="form-group">
                 <label>📱 Teléfono</label>
                 <input type="tel" id="telefono" placeholder="+5351234567">
-                <small>Ejemplo: +5351234567</small>
+                <small>Formato Cuba: +53 seguido de tu número</small>
             </div>
+            
             <div class="form-group">
                 <label>🏢 Proyecto</label>
                 <select id="proyecto">
-                    <option value="">Selecciona...</option>
-                    <option value="Proyecto Bernal">Proyecto Bernal</option>
-                    <option value="Ke Proyecto">Ke Proyecto</option>
+                    <option value="">Selecciona tu proyecto...</option>
+                    <option value="Proyecto Bernal">🏗️ Proyecto Bernal</option>
+                    <option value="Ke Proyecto">🔥 Ke Proyecto</option>
                 </select>
             </div>
+            
             <div class="form-group">
                 <label>🔒 Contraseña</label>
                 <input type="password" id="password" placeholder="Mínimo 6 caracteres">
             </div>
+            
             <div class="form-group">
                 <label>🔒 Confirmar Contraseña</label>
-                <input type="password" id="confirm" placeholder="Repite la contraseña">
+                <input type="password" id="confirm" placeholder="Repite tu contraseña">
             </div>
             
-            <button class="btn" id="btnRegistro">✅ CREAR CUENTA</button>
-            <div id="mensaje" class="mensaje"></div>
+            <button type="button" class="btn" onclick="registrarUsuario()">
+                ✅ CREAR CUENTA GRATIS
+            </button>
+            
+            <div id="mensaje" class="mensaje" style="display: none;"></div>
             
             <div class="volver">
-                <a href="index.html">⬅ Volver</a>
+                <a href="index.html">⬅ Volver al inicio</a>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const SUPABASE_URL = 'https://kmsqhldejyxyqtfrmvov.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imttc3FobGRlanl4eXF0ZnJtdm92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMzM4MDMsImV4cCI6MjA5MTYwOTgwM30.V8Ec5fAk22VPS1a2bBh0rAWiNcWt6Y6dBzgTAK8ImZs';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Inicializar Supabase UNA SOLA VEZ
+        const miSupabase = window.supabase.createClient(
+            'https://kmsqhldejyxyqtfrmvov.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imttc3FobGRlanl4eXF0ZnJtdm92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMzM4MDMsImV4cCI6MjA5MTYwOTgwM30.V8Ec5fAk22VPS1a2bBh0rAWiNcWt6Y6dBzgTAK8ImZs'
+        );
 
-        document.getElementById('btnRegistro').addEventListener('click', async function() {
+        console.log('✅ Script cargado');
+
+        async function registrarUsuario() {
+            console.log('🟢 Botón presionado');
+            
             const nombre = document.getElementById('nombre').value.trim();
             const email = document.getElementById('email').value.trim();
             const telefono = document.getElementById('telefono').value.trim();
             const proyecto = document.getElementById('proyecto').value;
             const password = document.getElementById('password').value;
             const confirm = document.getElementById('confirm').value;
-            const mensaje = document.getElementById('mensaje');
+            const mensajeDiv = document.getElementById('mensaje');
+            
+            mensajeDiv.style.display = 'block';
             
             if (!nombre || !email || !telefono || !proyecto || !password) {
-                mensaje.textContent = '❌ Completa todos los campos';
-                mensaje.className = 'mensaje error';
-                return;
-            }
-            if (password !== confirm) {
-                mensaje.textContent = '❌ Las contraseñas no coinciden';
-                mensaje.className = 'mensaje error';
-                return;
-            }
-            if (password.length < 6) {
-                mensaje.textContent = '❌ Mínimo 6 caracteres';
-                mensaje.className = 'mensaje error';
+                mensajeDiv.textContent = '❌ Completa todos los campos';
+                mensajeDiv.className = 'mensaje error';
                 return;
             }
             
+            if (password !== confirm) {
+                mensajeDiv.textContent = '❌ Las contraseñas no coinciden';
+                mensajeDiv.className = 'mensaje error';
+                return;
+            }
+            
+            if (password.length < 6) {
+                mensajeDiv.textContent = '❌ Mínimo 6 caracteres';
+                mensajeDiv.className = 'mensaje error';
+                return;
+            }
+            
+            mensajeDiv.textContent = '⏳ Creando cuenta...';
+            mensajeDiv.className = 'mensaje info';
+            
             try {
-                const { data: existe } = await supabase.from('perfiles').select('id').eq('email', email).single();
+                // Verificar email
+                const { data: existe } = await miSupabase
+                    .from('perfiles')
+                    .select('id')
+                    .eq('email', email)
+                    .single();
+                
                 if (existe) {
-                    mensaje.textContent = '❌ Este email ya está registrado';
-                    mensaje.className = 'mensaje error';
+                    mensajeDiv.textContent = '❌ Este email ya está registrado';
+                    mensajeDiv.className = 'mensaje error';
                     return;
                 }
                 
-                const { data: authData, error } = await supabase.auth.signUp({ email, password });
-                if (error) throw error;
-                
-                await supabase.from('perfiles').insert({
-                    id: authData.user.id, email, telefono, nombre_completo: nombre,
-                    proyecto_asignado: proyecto, rol: 'Usuario', activo: true
+                // Crear auth
+                const { data: authData, error: authError } = await miSupabase.auth.signUp({
+                    email: email,
+                    password: password
                 });
                 
-                mensaje.textContent = '✅ ¡Cuenta creada! Redirigiendo...';
-                mensaje.className = 'mensaje success';
+                if (authError) throw authError;
                 
-                setTimeout(() => window.location.href = 'login.html', 2000);
+                // Insertar perfil
+                const { error: perfilError } = await miSupabase
+                    .from('perfiles')
+                    .insert({
+                        id: authData.user.id,
+                        email: email,
+                        telefono: telefono,
+                        nombre_completo: nombre,
+                        proyecto_asignado: proyecto,
+                        rol: 'Usuario',
+                        activo: true
+                    });
+                
+                if (perfilError) throw perfilError;
+                
+                mensajeDiv.textContent = '✅ ¡Cuenta creada! Redirigiendo...';
+                mensajeDiv.className = 'mensaje success';
+                
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+                
             } catch (error) {
-                mensaje.textContent = '❌ Error al crear la cuenta';
-                mensaje.className = 'mensaje error';
+                console.error('Error:', error);
+                mensajeDiv.textContent = '❌ Error: ' + error.message;
+                mensajeDiv.className = 'mensaje error';
             }
-        });
+        }
     </script>
 </body>
 </html>
