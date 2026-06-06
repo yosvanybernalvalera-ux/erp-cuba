@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Cuenta - ERP Cuba</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #27ae60 0%, #1a5276 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .login-container { width: 100%; max-width: 450px; }
+        .login-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .login-header { text-align: center; margin-bottom: 25px; }
+        .logo-icon { font-size: 48px; }
+        h2 { color: #27ae60; margin: 10px 0; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
+        .form-group input, .form-group select { width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 10px; font-size: 15px; }
+        .btn { width: 100%; padding: 16px; background: #27ae60; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .mensaje { margin-top: 15px; padding: 12px; border-radius: 8px; text-align: center; }
+        .mensaje.error { background: #fadbd8; color: #c0392b; }
+        .mensaje.success { background: #d5f5e3; color: #27ae60; }
+        .volver { text-align: center; margin-top: 15px; }
+        .volver a { color: #2980b9; text-decoration: none; }
+        small { display: block; margin-top: 5px; color: #888; font-size: 12px; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo-icon">📝</div>
+                <h2>Crear Cuenta</h2>
+            </div>
+            
+            <div class="form-group">
+                <label>👤 Nombre Completo</label>
+                <input type="text" id="nombre" placeholder="Ej: Juan Pérez">
+            </div>
+            <div class="form-group">
+                <label>📧 Correo Electrónico</label>
+                <input type="email" id="email" placeholder="tu@email.com">
+            </div>
+            <div class="form-group">
+                <label>📱 Teléfono</label>
+                <input type="tel" id="telefono" placeholder="+5351234567">
+                <small>Ejemplo: +5351234567</small>
+            </div>
+            <div class="form-group">
+                <label>🏢 Proyecto</label>
+                <select id="proyecto">
+                    <option value="">Selecciona...</option>
+                    <option value="Proyecto Bernal">Proyecto Bernal</option>
+                    <option value="Ke Proyecto">Ke Proyecto</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>🔒 Contraseña</label>
+                <input type="password" id="password" placeholder="Mínimo 6 caracteres">
+            </div>
+            <div class="form-group">
+                <label>🔒 Confirmar Contraseña</label>
+                <input type="password" id="confirm" placeholder="Repite la contraseña">
+            </div>
+            
+            <button class="btn" id="btnRegistro">✅ CREAR CUENTA</button>
+            <div id="mensaje" class="mensaje"></div>
+            
+            <div class="volver">
+                <a href="index.html">⬅ Volver</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://kmsqhldejyxyqtfrmvov.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imttc3FobGRlanl4eXF0ZnJtdm92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMzM4MDMsImV4cCI6MjA5MTYwOTgwM30.V8Ec5fAk22VPS1a2bBh0rAWiNcWt6Y6dBzgTAK8ImZs';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        document.getElementById('btnRegistro').addEventListener('click', async function() {
+            const nombre = document.getElementById('nombre').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const telefono = document.getElementById('telefono').value.trim();
+            const proyecto = document.getElementById('proyecto').value;
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirm').value;
+            const mensaje = document.getElementById('mensaje');
+            
+            if (!nombre || !email || !telefono || !proyecto || !password) {
+                mensaje.textContent = '❌ Completa todos los campos';
+                mensaje.className = 'mensaje error';
+                return;
+            }
+            if (password !== confirm) {
+                mensaje.textContent = '❌ Las contraseñas no coinciden';
+                mensaje.className = 'mensaje error';
+                return;
+            }
+            if (password.length < 6) {
+                mensaje.textContent = '❌ Mínimo 6 caracteres';
+                mensaje.className = 'mensaje error';
+                return;
+            }
+            
+            try {
+                const { data: existe } = await supabase.from('perfiles').select('id').eq('email', email).single();
+                if (existe) {
+                    mensaje.textContent = '❌ Este email ya está registrado';
+                    mensaje.className = 'mensaje error';
+                    return;
+                }
+                
+                const { data: authData, error } = await supabase.auth.signUp({ email, password });
+                if (error) throw error;
+                
+                await supabase.from('perfiles').insert({
+                    id: authData.user.id, email, telefono, nombre_completo: nombre,
+                    proyecto_asignado: proyecto, rol: 'Usuario', activo: true
+                });
+                
+                mensaje.textContent = '✅ ¡Cuenta creada! Redirigiendo...';
+                mensaje.className = 'mensaje success';
+                
+                setTimeout(() => window.location.href = 'login.html', 2000);
+            } catch (error) {
+                mensaje.textContent = '❌ Error al crear la cuenta';
+                mensaje.className = 'mensaje error';
+            }
+        });
+    </script>
+</body>
+</html>
