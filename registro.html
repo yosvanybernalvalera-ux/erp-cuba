@@ -16,35 +16,13 @@
             padding: 20px; 
         }
         .container { width: 100%; max-width: 450px; }
-        .card { 
-            background: white; 
-            border-radius: 20px; 
-            padding: 30px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
-        }
+        .card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
         .header { text-align: center; margin-bottom: 25px; }
         .header h2 { color: #27ae60; }
         .form-group { margin-bottom: 18px; }
         .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; }
-        .form-group input, .form-group select { 
-            width: 100%; 
-            padding: 13px; 
-            border: 2px solid #ddd; 
-            border-radius: 10px; 
-            font-size: 15px; 
-        }
-        .btn { 
-            width: 100%; 
-            padding: 15px; 
-            background: #27ae60; 
-            color: white; 
-            border: none; 
-            border-radius: 10px; 
-            font-size: 17px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            margin-top: 10px;
-        }
+        .form-group input, .form-group select { width: 100%; padding: 13px; border: 2px solid #ddd; border-radius: 10px; font-size: 15px; }
+        .btn { width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 10px; font-size: 17px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn:active { background: #1e8449; }
         .mensaje { margin-top: 15px; padding: 12px; border-radius: 8px; text-align: center; font-size: 14px; }
         .error { background: #fadbd8; color: #c0392b; }
@@ -98,7 +76,7 @@
                 <input type="password" id="confirm" placeholder="Repite tu contraseña">
             </div>
             
-            <button type="button" class="btn" onclick="registrarUsuario()">
+            <button type="button" class="btn" id="btnCrear">
                 ✅ CREAR CUENTA GRATIS
             </button>
             
@@ -110,77 +88,79 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Inicializar Supabase UNA SOLA VEZ
-        const miSupabase = window.supabase.createClient(
-            'https://kmsqhldejyxyqtfrmvov.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imttc3FobGRlanl4eXF0ZnJtdm92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMzM4MDMsImV4cCI6MjA5MTYwOTgwM30.V8Ec5fAk22VPS1a2bBh0rAWiNcWt6Y6dBzgTAK8ImZs'
-        );
-
-        console.log('✅ Script cargado');
-
-        async function registrarUsuario() {
-            console.log('🟢 Botón presionado');
+        // Esperar a que todo cargue
+        window.addEventListener('DOMContentLoaded', function() {
             
-            const nombre = document.getElementById('nombre').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const telefono = document.getElementById('telefono').value.trim();
-            const proyecto = document.getElementById('proyecto').value;
-            const password = document.getElementById('password').value;
-            const confirm = document.getElementById('confirm').value;
-            const mensajeDiv = document.getElementById('mensaje');
+            // Crear cliente de Supabase con nombre único
+            var erpDB = null;
             
-            mensajeDiv.style.display = 'block';
-            
-            if (!nombre || !email || !telefono || !proyecto || !password) {
-                mensajeDiv.textContent = '❌ Completa todos los campos';
-                mensajeDiv.className = 'mensaje error';
-                return;
+            if (window.supabase && window.supabase.createClient) {
+                erpDB = window.supabase.createClient(
+                    'https://kmsqhldejyxyqtfrmvov.supabase.co',
+                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imttc3FobGRlanl4eXF0ZnJtdm92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMzM4MDMsImV4cCI6MjA5MTYwOTgwM30.V8Ec5fAk22VPS1a2bBh0rAWiNcWt6Y6dBzgTAK8ImZs'
+                );
+                console.log('✅ Supabase conectado');
+            } else {
+                console.error('❌ Supabase no se cargó');
             }
             
-            if (password !== confirm) {
-                mensajeDiv.textContent = '❌ Las contraseñas no coinciden';
-                mensajeDiv.className = 'mensaje error';
-                return;
-            }
-            
-            if (password.length < 6) {
-                mensajeDiv.textContent = '❌ Mínimo 6 caracteres';
-                mensajeDiv.className = 'mensaje error';
-                return;
-            }
-            
-            mensajeDiv.textContent = '⏳ Creando cuenta...';
-            mensajeDiv.className = 'mensaje info';
-            
-            try {
-                // Verificar email
-                const { data: existe } = await miSupabase
-                    .from('perfiles')
-                    .select('id')
-                    .eq('email', email)
-                    .single();
+            // Asignar evento al botón
+            document.getElementById('btnCrear').addEventListener('click', async function() {
                 
-                if (existe) {
-                    mensajeDiv.textContent = '❌ Este email ya está registrado';
+                var nombre = document.getElementById('nombre').value.trim();
+                var email = document.getElementById('email').value.trim();
+                var telefono = document.getElementById('telefono').value.trim();
+                var proyecto = document.getElementById('proyecto').value;
+                var password = document.getElementById('password').value;
+                var confirm = document.getElementById('confirm').value;
+                var mensajeDiv = document.getElementById('mensaje');
+                
+                mensajeDiv.style.display = 'block';
+                
+                if (!nombre || !email || !telefono || !proyecto || !password) {
+                    mensajeDiv.textContent = '❌ Completa todos los campos';
                     mensajeDiv.className = 'mensaje error';
                     return;
                 }
                 
-                // Crear auth
-                const { data: authData, error: authError } = await miSupabase.auth.signUp({
-                    email: email,
-                    password: password
-                });
+                if (password !== confirm) {
+                    mensajeDiv.textContent = '❌ Las contraseñas no coinciden';
+                    mensajeDiv.className = 'mensaje error';
+                    return;
+                }
                 
-                if (authError) throw authError;
+                if (password.length < 6) {
+                    mensajeDiv.textContent = '❌ Mínimo 6 caracteres';
+                    mensajeDiv.className = 'mensaje error';
+                    return;
+                }
                 
-                // Insertar perfil
-                const { error: perfilError } = await miSupabase
-                    .from('perfiles')
-                    .insert({
-                        id: authData.user.id,
+                mensajeDiv.textContent = '⏳ Creando cuenta...';
+                mensajeDiv.className = 'mensaje info';
+                
+                try {
+                    // Verificar email
+                    var check = await erpDB.from('perfiles').select('id').eq('email', email).single();
+                    
+                    if (check.data) {
+                        mensajeDiv.textContent = '❌ Este email ya está registrado';
+                        mensajeDiv.className = 'mensaje error';
+                        return;
+                    }
+                    
+                    // Crear auth
+                    var auth = await erpDB.auth.signUp({ email: email, password: password });
+                    
+                    if (auth.error) {
+                        mensajeDiv.textContent = '❌ ' + auth.error.message;
+                        mensajeDiv.className = 'mensaje error';
+                        return;
+                    }
+                    
+                    // Insertar perfil
+                    var insert = await erpDB.from('perfiles').insert({
+                        id: auth.data.user.id,
                         email: email,
                         telefono: telefono,
                         nombre_completo: nombre,
@@ -188,22 +168,29 @@
                         rol: 'Usuario',
                         activo: true
                     });
-                
-                if (perfilError) throw perfilError;
-                
-                mensajeDiv.textContent = '✅ ¡Cuenta creada! Redirigiendo...';
-                mensajeDiv.className = 'mensaje success';
-                
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 2000);
-                
-            } catch (error) {
-                console.error('Error:', error);
-                mensajeDiv.textContent = '❌ Error: ' + error.message;
-                mensajeDiv.className = 'mensaje error';
-            }
-        }
+                    
+                    if (insert.error) {
+                        mensajeDiv.textContent = '❌ ' + insert.error.message;
+                        mensajeDiv.className = 'mensaje error';
+                        return;
+                    }
+                    
+                    mensajeDiv.textContent = '✅ ¡Cuenta creada! Redirigiendo...';
+                    mensajeDiv.className = 'mensaje success';
+                    
+                    setTimeout(function() {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    
+                } catch(e) {
+                    console.error(e);
+                    mensajeDiv.textContent = '❌ Error: ' + e.message;
+                    mensajeDiv.className = 'mensaje error';
+                }
+            });
+            
+            console.log('✅ Botón configurado');
+        });
     </script>
 </body>
 </html>
