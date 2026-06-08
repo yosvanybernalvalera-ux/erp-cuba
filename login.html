@@ -7,87 +7,119 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #1a5276 0%, #2980b9 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .login-container { width: 100%; max-width: 450px; }
-        .login-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-        .login-header { text-align: center; margin-bottom: 25px; }
-        .logo-icon { font-size: 48px; }
+        .container { width: 100%; max-width: 450px; }
+        .card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .header { text-align: center; margin-bottom: 25px; }
+        .logo { font-size: 48px; }
         h2 { color: #1a5276; margin: 10px 0; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
-        .form-group input { width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 10px; font-size: 15px; }
-        .btn { width: 100%; padding: 16px; background: #1a5276; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .mensaje { margin-top: 15px; padding: 12px; border-radius: 8px; text-align: center; }
-        .mensaje.error { background: #fadbd8; color: #c0392b; }
-        .mensaje.success { background: #d5f5e3; color: #27ae60; }
-        .volver { text-align: center; margin-top: 15px; }
-        .volver a { color: #2980b9; text-decoration: none; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; }
+        .form-group input { width: 100%; padding: 13px; border: 2px solid #ddd; border-radius: 10px; font-size: 15px; }
+        .btn { width: 100%; padding: 15px; background: #1a5276; color: white; border: none; border-radius: 10px; font-size: 17px; font-weight: bold; cursor: pointer; }
+        .btn:active { background: #154360; }
+        .mensaje { margin-top: 15px; padding: 12px; border-radius: 8px; text-align: center; font-size: 14px; }
+        .error { background: #fadbd8; color: #c0392b; }
+        .success { background: #d5f5e3; color: #27ae60; }
+        .links { text-align: center; margin-top: 15px; }
+        .links a { color: #2980b9; text-decoration: none; font-size: 14px; }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <div class="logo-icon">🔐</div>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <div class="logo">🇨🇺🏗️</div>
                 <h2>Iniciar Sesión</h2>
+                <p style="color: #666; font-size: 14px;">Proyecto Bernal • Ke Proyecto</p>
             </div>
             
             <div class="form-group">
                 <label>📧 Correo Electrónico</label>
-                <input type="email" id="loginEmail" placeholder="tu@email.com">
+                <input type="email" id="email" placeholder="tu@email.com">
             </div>
+            
             <div class="form-group">
                 <label>🔒 Contraseña</label>
-                <input type="password" id="loginPassword" placeholder="••••••••">
+                <input type="password" id="password" placeholder="••••••••">
             </div>
+            
             <div class="form-group">
-                <label><input type="checkbox" id="recordar"> Recordar sesión</label>
+                <label>
+                    <input type="checkbox" id="recordar"> Recordar sesión
+                </label>
             </div>
             
-            <button class="btn" id="btnLogin">🚀 INICIAR SESIÓN</button>
-            <div id="mensaje" class="mensaje"></div>
+            <button type="button" class="btn" id="btnLogin">
+                🚀 INICIAR SESIÓN
+            </button>
             
-            <div class="volver">
-                <a href="index.html">⬅ Volver</a>
+            <div id="mensaje"></div>
+            
+            <div class="links">
+                <a href="index.html">⬅ Volver</a> |
+                <a href="registro.html">📝 Crear cuenta</a>
             </div>
         </div>
     </div>
 
+    <script src="js/storage.js"></script>
     <script>
-        const SUPABASE_URL = 'https://kmsqhldejyxyqtfrmvov.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imttc3FobGRlanl4eXF0ZnJtdm92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMzM4MDMsImV4cCI6MjA5MTYwOTgwM30.V8Ec5fAk22VPS1a2bBh0rAWiNcWt6Y6dBzgTAK8ImZs';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Verificar si ya hay sesión guardada
+        (function() {
+            var sesion = localStorage.getItem('erp_sesion');
+            if (sesion) {
+                var datos = JSON.parse(sesion);
+                document.getElementById('email').value = datos.email || '';
+                document.getElementById('recordar').checked = true;
+            }
+        })();
 
-        document.getElementById('btnLogin').addEventListener('click', async function() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            const recordar = document.getElementById('recordar').checked;
-            const mensaje = document.getElementById('mensaje');
+        document.getElementById('btnLogin').addEventListener('click', function() {
+            
+            var email = document.getElementById('email').value.trim().toLowerCase();
+            var password = document.getElementById('password').value;
+            var recordar = document.getElementById('recordar').checked;
+            var msg = document.getElementById('mensaje');
             
             if (!email || !password) {
-                mensaje.textContent = '❌ Completa todos los campos';
-                mensaje.className = 'mensaje error';
+                msg.textContent = '❌ Completa todos los campos';
+                msg.className = 'mensaje error';
                 return;
             }
             
-            try {
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) throw error;
+            // Buscar usuario
+            var usuarios = STORAGE.leer('usuarios');
+            var usuario = usuarios.find(function(u) { 
+                return u.email.toLowerCase() === email && u.password === password && u.activo !== false;
+            });
+            
+            if (usuario) {
+                msg.textContent = '✅ ¡Bienvenido ' + usuario.nombre + '!';
+                msg.className = 'mensaje success';
                 
-                const { data: perfil } = await supabase.from('perfiles').select('*').eq('email', email).single();
+                var sesion = {
+                    id: usuario.id,
+                    email: usuario.email,
+                    nombre: usuario.nombre,
+                    telefono: usuario.telefono,
+                    proyecto: usuario.proyecto,
+                    rol: usuario.rol,
+                    timestamp: new Date().getTime()
+                };
                 
-                if (perfil) {
-                    const sessionData = { email: perfil.email, nombre: perfil.nombre_completo, proyecto: perfil.proyecto_asignado, rol: perfil.rol };
-                    if (recordar) localStorage.setItem('erp_session', JSON.stringify(sessionData));
-                    else sessionStorage.setItem('erp_session', JSON.stringify(sessionData));
-                    
-                    mensaje.textContent = '✅ ¡Bienvenido! Redirigiendo...';
-                    mensaje.className = 'mensaje success';
-                    setTimeout(() => window.location.href = 'dashboard.html', 1000);
+                if (recordar) {
+                    localStorage.setItem('erp_sesion', JSON.stringify(sesion));
+                } else {
+                    sessionStorage.setItem('erp_sesion', JSON.stringify(sesion));
                 }
-            } catch (error) {
-                mensaje.textContent = '❌ Email o contraseña incorrectos';
-                mensaje.className = 'mensaje error';
+                
+                setTimeout(function() {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+                
+            } else {
+                msg.textContent = '❌ Email o contraseña incorrectos';
+                msg.className = 'mensaje error';
             }
         });
     </script>
