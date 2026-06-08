@@ -6,15 +6,7 @@
     <title>Crear Cuenta - ERP Cuba</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            background: linear-gradient(135deg, #27ae60 0%, #1a5276 100%); 
-            min-height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 20px; 
-        }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #27ae60 0%, #1a5276 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .container { width: 100%; max-width: 450px; }
         .card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
         .header { text-align: center; margin-bottom: 25px; }
@@ -30,7 +22,6 @@
         .info { background: #d6eaf8; color: #2980b9; }
         .volver { text-align: center; margin-top: 15px; }
         .volver a { color: #2980b9; text-decoration: none; font-size: 14px; }
-        small { display: block; margin-top: 4px; color: #888; font-size: 11px; }
     </style>
 </head>
 <body>
@@ -54,7 +45,6 @@
             <div class="form-group">
                 <label>📱 Teléfono</label>
                 <input type="tel" id="telefono" placeholder="+5351234567">
-                <small>Formato Cuba: +53 seguido de tu número</small>
             </div>
             
             <div class="form-group">
@@ -80,7 +70,7 @@
                 ✅ CREAR CUENTA GRATIS
             </button>
             
-            <div id="mensaje" class="mensaje" style="display: none;"></div>
+            <div id="mensaje"></div>
             
             <div class="volver">
                 <a href="index.html">⬅ Volver al inicio</a>
@@ -88,115 +78,67 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+    <script src="js/storage.js"></script>
     <script>
-        var erpDB = null;
-        var intentos = 0;
-        
-        // Intentar conectar a Supabase
-        function conectarSupabase() {
-            intentos++;
-            console.log('Intento ' + intentos + ' de conexión...');
+        document.getElementById('btnCrear').addEventListener('click', function() {
             
-            if (typeof supabase !== 'undefined' && supabase.createClient) {
-                erpDB = supabase.createClient(
-                    'https://kmsqhldejyxyqtfrmvov.supabase.co',
-                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imttc3FobGRlanl4eXF0ZnJtdm92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMzM4MDMsImV4cCI6MjA5MTYwOTgwM30.V8Ec5fAk22VPS1a2bBh0rAWiNcWt6Y6dBzgTAK8ImZs'
-                );
-                console.log('✅ Supabase conectado');
-                configurarBoton();
-            } else if (intentos < 20) {
-                setTimeout(conectarSupabase, 500);
-            } else {
-                console.error('❌ No se pudo conectar a Supabase');
-                var msg = document.getElementById('mensaje');
-                msg.style.display = 'block';
-                msg.textContent = '⚠️ Error de conexión. Recarga la página.';
+            var nombre = document.getElementById('nombre').value.trim();
+            var email = document.getElementById('email').value.trim();
+            var telefono = document.getElementById('telefono').value.trim();
+            var proyecto = document.getElementById('proyecto').value;
+            var password = document.getElementById('password').value;
+            var confirm = document.getElementById('confirm').value;
+            var msg = document.getElementById('mensaje');
+            
+            // Validar
+            if (!nombre || !email || !telefono || !proyecto || !password) {
+                msg.textContent = '❌ Completa todos los campos';
                 msg.className = 'mensaje error';
+                return;
             }
-        }
-        
-        function configurarBoton() {
-            document.getElementById('btnCrear').addEventListener('click', async function() {
-                
-                var nombre = document.getElementById('nombre').value.trim();
-                var email = document.getElementById('email').value.trim();
-                var telefono = document.getElementById('telefono').value.trim();
-                var proyecto = document.getElementById('proyecto').value;
-                var password = document.getElementById('password').value;
-                var confirm = document.getElementById('confirm').value;
-                var msg = document.getElementById('mensaje');
-                
-                msg.style.display = 'block';
-                
-                if (!nombre || !email || !telefono || !proyecto || !password) {
-                    msg.textContent = '❌ Completa todos los campos';
-                    msg.className = 'mensaje error';
-                    return;
-                }
-                
-                if (password !== confirm) {
-                    msg.textContent = '❌ Las contraseñas no coinciden';
-                    msg.className = 'mensaje error';
-                    return;
-                }
-                
-                if (password.length < 6) {
-                    msg.textContent = '❌ Mínimo 6 caracteres';
-                    msg.className = 'mensaje error';
-                    return;
-                }
-                
-                msg.textContent = '⏳ Creando cuenta...';
-                msg.className = 'mensaje info';
-                
-                try {
-                    var check = await erpDB.from('perfiles').select('id').eq('email', email).single();
-                    
-                    if (check.data) {
-                        msg.textContent = '❌ Este email ya está registrado';
-                        msg.className = 'mensaje error';
-                        return;
-                    }
-                    
-                    var auth = await erpDB.auth.signUp({ email: email, password: password });
-                    
-                    if (auth.error) {
-                        msg.textContent = '❌ ' + auth.error.message;
-                        msg.className = 'mensaje error';
-                        return;
-                    }
-                    
-                    await erpDB.from('perfiles').insert({
-                        id: auth.data.user.id,
-                        email: email,
-                        telefono: telefono,
-                        nombre_completo: nombre,
-                        proyecto_asignado: proyecto,
-                        rol: 'Usuario',
-                        activo: true
-                    });
-                    
-                    msg.textContent = '✅ ¡Cuenta creada! Redirigiendo...';
-                    msg.className = 'mensaje success';
-                    
-                    setTimeout(function() {
-                        window.location.href = 'login.html';
-                    }, 2000);
-                    
-                } catch(e) {
-                    console.error(e);
-                    msg.textContent = '❌ Error: ' + e.message;
-                    msg.className = 'mensaje error';
-                }
-            });
             
-            console.log('✅ Botón listo');
-        }
-        
-        // Iniciar conexión
-        conectarSupabase();
+            if (password !== confirm) {
+                msg.textContent = '❌ Las contraseñas no coinciden';
+                msg.className = 'mensaje error';
+                return;
+            }
+            
+            if (password.length < 6) {
+                msg.textContent = '❌ Mínimo 6 caracteres';
+                msg.className = 'mensaje error';
+                return;
+            }
+            
+            // Verificar si el email ya existe
+            var usuarios = STORAGE.leer('usuarios');
+            var existe = usuarios.find(function(u) { return u.email === email; });
+            
+            if (existe) {
+                msg.textContent = '❌ Este email ya está registrado';
+                msg.className = 'mensaje error';
+                return;
+            }
+            
+            // Crear usuario
+            var nuevoUsuario = {
+                email: email,
+                password: password,
+                nombre: nombre,
+                telefono: telefono,
+                proyecto: proyecto,
+                rol: 'Usuario',
+                activo: true
+            };
+            
+            STORAGE.agregar('usuarios', nuevoUsuario);
+            
+            msg.textContent = '✅ ¡Cuenta creada! Redirigiendo...';
+            msg.className = 'mensaje success';
+            
+            setTimeout(function() {
+                window.location.href = 'login.html';
+            }, 1500);
+        });
     </script>
 </body>
 </html>
