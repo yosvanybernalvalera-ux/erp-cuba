@@ -6,33 +6,28 @@
     <title>Trabajadores - ERP Cuba</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --primary: #1a5276; --dark: #2c3e50; --light: #ecf0f1; --success: #27ae60; --danger: #c0392b; }
+        :root { --primary: #1a5276; --dark: #2c3e50; --light: #ecf0f1; --success: #27ae60; --danger: #c0392b; --warning: #f39c12; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); }
         .app { display: flex; min-height: 100vh; }
-        
         .sidebar { width: 260px; background: var(--dark); color: white; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; }
         .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-header h3 { font-size: 16px; }
-        .sidebar-header small { opacity: 0.7; font-size: 12px; }
+        .sidebar-header h3 { font-size: 16px; } .sidebar-header small { opacity: 0.7; font-size: 12px; }
         .sidebar-nav { padding: 15px 0; }
         .nav-item { display: flex; align-items: center; gap: 10px; padding: 12px 20px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; }
         .nav-item:hover, .nav-item.active { background: var(--primary); color: white; }
         .sidebar-footer { padding: 15px 20px; border-top: 1px solid rgba(255,255,255,0.1); position: absolute; bottom: 0; width: 100%; }
         .btn-logout { width: 100%; padding: 10px; background: rgba(255,255,255,0.1); color: white; border: none; border-radius: 8px; cursor: pointer; }
         .btn-logout:hover { background: var(--danger); }
-        
         .main { flex: 1; margin-left: 260px; padding: 20px; }
         .topbar { background: white; padding: 15px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .topbar h1 { font-size: 20px; }
         .btn-primary { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; }
         
-        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-        .stat-card { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-        .stat-card h3 { font-size: 22px; color: var(--dark); }
-        .stat-card p { font-size: 12px; color: #666; }
+        .tabs { display: flex; gap: 0; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; background: white; border: 1px solid #ddd; cursor: pointer; font-weight: 600; }
+        .tab.active { background: var(--primary); color: white; }
+        .tab:first-child { border-radius: 8px 0 0 8px; }
+        .tab:last-child { border-radius: 0 8px 8px 0; }
         
-        .search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
-        .search-bar input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
         .section { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; }
@@ -40,109 +35,88 @@
         .badge { padding: 4px 10px; border-radius: 15px; font-size: 11px; font-weight: bold; }
         .badge.activo { background: #d5f5e3; color: var(--success); }
         .badge.inactivo { background: #e0e0e0; color: #666; }
-        .btn-icon { background: none; border: none; font-size: 16px; cursor: pointer; margin: 0 3px; }
+        .badge.si { background: #d5f5e3; color: var(--success); }
+        .badge.no { background: #fdebd0; color: var(--warning); }
+        .btn-small { padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; margin: 0 2px; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
         
         .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
         .modal.active { display: flex; }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; max-width: 550px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; }
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
         .btn-secondary { background: #95a5a6; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; }
         .menu-btn { display: none; background: none; border: none; font-size: 24px; cursor: pointer; }
-        
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(-260px); transition: 0.3s; }
-            .sidebar.open { transform: translateX(0); }
-            .main { margin-left: 0; }
-            .menu-btn { display: block; }
-            .form-row { grid-template-columns: 1fr; }
-            .stats { grid-template-columns: 1fr; }
-            .search-bar { flex-direction: column; }
-        }
+        @media (max-width: 768px) { .sidebar { transform: translateX(-260px); } .sidebar.open { transform: translateX(0); } .main { margin-left: 0; } .menu-btn { display: block; } }
     </style>
 </head>
 <body>
     <div class="app">
         <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <h3 id="proyectoNombre">🇨🇺 ERP Cuba</h3>
-                <small id="userNombre"></small>
-            </div>
+            <div class="sidebar-header"><h3 id="proyectoNombre">🇨🇺 ERP Cuba</h3><small id="userNombre"></small></div>
             <nav class="sidebar-nav">
                 <a href="dashboard.html" class="nav-item">📊 Dashboard</a>
                 <a href="clientes.html" class="nav-item">👥 Clientes</a>
                 <a href="trabajadores.html" class="nav-item active">👷 Trabajadores</a>
                 <a href="proyectos.html" class="nav-item">🏗️ Proyectos</a>
             </nav>
-            <div class="sidebar-footer">
-                <button class="btn-logout" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
-            </div>
+            <div class="sidebar-footer"><button class="btn-logout" onclick="cerrarSesion()">🚪 Cerrar Sesión</button></div>
         </aside>
         
         <main class="main">
             <div class="topbar">
                 <button class="menu-btn" onclick="toggleSidebar()">☰</button>
                 <h1>👷 Gestión de Trabajadores</h1>
-                <button class="btn-primary" onclick="abrirModal()">➕ Nuevo Trabajador</button>
             </div>
             
-            <div class="stats">
-                <div class="stat-card"><h3 id="totalActivos">0</h3><p>Trabajadores Activos</p></div>
-                <div class="stat-card"><h3 id="tarifaPromedio">0 CUP</h3><p>Tarifa Promedio/h</p></div>
-                <div class="stat-card"><h3 id="totalAsignados">0</h3><p>En Proyectos</p></div>
+            <!-- Pestañas -->
+            <div class="tabs">
+                <div class="tab active" onclick="mostrarTab('trabajadores')">👷 Trabajadores Activos</div>
+                <div class="tab" onclick="mostrarTab('usuarios')">👤 Usuarios Registrados</div>
             </div>
             
-            <div class="search-bar">
-                <input type="text" id="busqueda" placeholder="🔍 Buscar trabajador..." onkeyup="cargarTrabajadores()">
-            </div>
-            
-            <div class="section">
+            <!-- Tabla de Trabajadores -->
+            <div class="section" id="tabTrabajadores">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                    <h2>Trabajadores Activos</h2>
+                    <button class="btn-primary" onclick="abrirModalNuevo()">➕ Nuevo Trabajador</button>
+                </div>
                 <table>
-                    <thead>
-                        <tr><th>Nombre</th><th>Especialidad</th><th>Tarifa (CUP/h)</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr>
-                    </thead>
+                    <thead><tr><th>Nombre</th><th>Especialidad</th><th>Tarifa (CUP/h)</th><th>Teléfono</th><th>Proyectos</th><th>Acciones</th></tr></thead>
                     <tbody id="trabajadoresBody"></tbody>
+                </table>
+            </div>
+            
+            <!-- Tabla de Usuarios -->
+            <div class="section" id="tabUsuarios" style="display:none;">
+                <h2 style="margin-bottom:15px;">Usuarios Registrados</h2>
+                <p style="margin-bottom:15px;color:#666;">Estos son los usuarios del sistema. Puedes convertirlos en trabajadores.</p>
+                <table>
+                    <thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>¿Es Trabajador?</th><th>Acción</th></tr></thead>
+                    <tbody id="usuariosBody"></tbody>
                 </table>
             </div>
         </main>
     </div>
     
-    <div class="modal" id="modalTrabajador">
+    <!-- Modal para convertir usuario en trabajador -->
+    <div class="modal" id="modalConvertir">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitulo">➕ Nuevo Trabajador</h2>
-                <button class="modal-close" onclick="cerrarModal()">&times;</button>
-            </div>
-            <form id="formTrabajador" onsubmit="return false;">
-                <input type="hidden" id="trabajadorId">
-                <div class="form-row">
-                    <div class="form-group"><label>👤 Nombre *</label><input type="text" id="nombre" required></div>
-                    <div class="form-group"><label>👤 Apellidos *</label><input type="text" id="apellidos" required></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group"><label>🆔 Carnet</label><input type="text" id="carnet"></div>
-                    <div class="form-group"><label>📱 Teléfono</label><input type="tel" id="telefono"></div>
-                </div>
-                <div class="form-group"><label>📧 Email</label><input type="email" id="email"></div>
-                <div class="form-row">
-                    <div class="form-group"><label>🔧 Especialidad</label><input type="text" id="especialidad"></div>
-                    <div class="form-group"><label>💰 Tarifa Hora (CUP)</label><input type="number" id="tarifa_cup" step="0.01"></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group"><label>💵 Tarifa Hora (USD)</label><input type="number" id="tarifa_usd" step="0.01"></div>
-                    <div class="form-group"><label>📅 Tarifa Día (CUP)</label><input type="number" id="tarifa_dia" step="0.01"></div>
-                </div>
-                <div class="form-group">
-                    <label><input type="checkbox" id="activo" checked> Trabajador Activo</label>
-                </div>
+            <div class="modal-header"><h2>🔧 Convertir en Trabajador</h2><button class="modal-close" onclick="cerrarModal()">&times;</button></div>
+            <form onsubmit="return false;">
+                <input type="hidden" id="convertirUsuarioId">
+                <p id="convertirNombre" style="font-weight:bold;margin-bottom:15px;"></p>
+                <div class="form-group"><label>🔧 Especialidad</label><input type="text" id="convertirEspecialidad" placeholder="Ej: Albañil, Electricista..."></div>
+                <div class="form-group"><label>💰 Tarifa por Hora (CUP)</label><input type="number" id="convertirTarifa" placeholder="350" step="0.01"></div>
                 <div class="form-actions">
                     <button type="button" class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
-                    <button type="submit" class="btn-primary" onclick="guardarTrabajador()">💾 Guardar</button>
+                    <button type="submit" class="btn-primary btn-success" onclick="convertirUsuario()">✅ Convertir</button>
                 </div>
             </form>
         </div>
@@ -151,6 +125,7 @@
     <script src="js/storage.js"></script>
     <script>
         var usuarioActual = null;
+        var tabActual = 'trabajadores';
         
         function verificarSesion() {
             var sesion = localStorage.getItem('erp_sesion') || sessionStorage.getItem('erp_sesion');
@@ -160,106 +135,119 @@
             document.getElementById('userNombre').textContent = usuarioActual.nombre;
         }
         
-        function cargarTrabajadores() {
-            var busqueda = document.getElementById('busqueda').value.toLowerCase();
-            var trabajadores = STORAGE.buscar('trabajadores', 'proyecto', usuarioActual.proyecto);
-            
-            if (busqueda) {
-                trabajadores = trabajadores.filter(function(t) {
-                    return (t.nombre + ' ' + t.apellidos).toLowerCase().includes(busqueda) ||
-                           (t.especialidad || '').toLowerCase().includes(busqueda);
-                });
+        function mostrarTab(tab) {
+            tabActual = tab;
+            document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+            if (tab === 'trabajadores') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('tabTrabajadores').style.display = 'block';
+                document.getElementById('tabUsuarios').style.display = 'none';
+                cargarTrabajadores();
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('tabTrabajadores').style.display = 'none';
+                document.getElementById('tabUsuarios').style.display = 'block';
+                cargarUsuarios();
             }
-            
-            // Estadísticas
-            var activos = trabajadores.filter(function(t){ return t.activo !== false; });
-            document.getElementById('totalActivos').textContent = activos.length;
-            
-            var tarifas = activos.filter(function(t){ return t.tarifa_hora_cup > 0; });
-            var promedio = tarifas.length > 0 ? tarifas.reduce(function(s, t){ return s + t.tarifa_hora_cup; }, 0) / tarifas.length : 0;
-            document.getElementById('tarifaPromedio').textContent = promedio.toFixed(2) + ' CUP';
-            document.getElementById('totalAsignados').textContent = '0';
-            
-            // Tabla
+        }
+        
+        function cargarTrabajadores() {
+            var trabajadores = STORAGE.buscar('trabajadores', 'proyecto', usuarioActual.proyecto);
+            var proyectos = STORAGE.buscar('proyectos', 'proyecto', usuarioActual.proyecto);
             var tbody = document.getElementById('trabajadoresBody');
+            
             if (trabajadores.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay trabajadores</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay trabajadores. Ve a "Usuarios Registrados" para convertir alguno.</td></tr>';
                 return;
             }
             
             tbody.innerHTML = trabajadores.map(function(t) {
+                var proyectosAsignados = proyectos.filter(function(p) {
+                    return p.trabajadores_asignados && p.trabajadores_asignados.indexOf(t.id) >= 0;
+                });
                 return '<tr>' +
-                    '<td><strong>' + (t.nombre || '') + ' ' + (t.apellidos || '') + '</strong></td>' +
+                    '<td><strong>' + t.nombre + ' ' + (t.apellidos || '') + '</strong></td>' +
                     '<td>' + (t.especialidad || '-') + '</td>' +
                     '<td>' + (t.tarifa_hora_cup || 0).toFixed(2) + ' CUP</td>' +
                     '<td>' + (t.telefono || '-') + '</td>' +
-                    '<td><span class="badge ' + (t.activo !== false ? 'activo' : 'inactivo') + '">' + (t.activo !== false ? 'Activo' : 'Inactivo') + '</span></td>' +
+                    '<td>' + proyectosAsignados.length + ' proyecto(s)</td>' +
                     '<td>' +
-                        '<button class="btn-icon" onclick="editarTrabajador(\'' + t.id + '\')">✏️</button>' +
-                        '<button class="btn-icon" onclick="toggleTrabajador(\'' + t.id + '\')">' + (t.activo !== false ? '🔴' : '🟢') + '</button>' +
+                        '<button class="btn-small btn-warning" onclick="editarTrabajador(\'' + t.id + '\')">✏️</button>' +
+                        '<button class="btn-small btn-danger" onclick="quitarTrabajador(\'' + t.id + '\')">🗑️</button>' +
                     '</td>' +
                 '</tr>';
             }).join('');
         }
         
-        function abrirModal() {
-            document.getElementById('modalTitulo').textContent = '➕ Nuevo Trabajador';
-            document.getElementById('formTrabajador').reset();
-            document.getElementById('trabajadorId').value = '';
-            document.getElementById('modalTrabajador').classList.add('active');
+        function cargarUsuarios() {
+            var usuarios = STORAGE.usuariosTrabajadores(usuarioActual.proyecto);
+            var trabajadores = STORAGE.buscar('trabajadores', 'proyecto', usuarioActual.proyecto);
+            var tbody = document.getElementById('usuariosBody');
+            
+            if (usuarios.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay usuarios registrados</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = usuarios.map(function(u) {
+                var esTrabajador = trabajadores.some(function(t) { return t.usuario_id === u.id; });
+                return '<tr>' +
+                    '<td><strong>' + u.nombre + '</strong></td>' +
+                    '<td>' + u.email + '</td>' +
+                    '<td>' + (u.telefono || '-') + '</td>' +
+                    '<td><span class="badge ' + (esTrabajador ? 'si' : 'no') + '">' + (esTrabajador ? 'Sí' : 'No') + '</span></td>' +
+                    '<td>' + (!esTrabajador ? '<button class="btn-small btn-success" onclick="abrirConvertir(\'' + u.id + '\', \'' + u.nombre + '\')">🔧 Convertir</button>' : '<span style="color:gray;">Ya es trabajador</span>') + '</td>' +
+                '</tr>';
+            }).join('');
         }
         
-        function cerrarModal() { document.getElementById('modalTrabajador').classList.remove('active'); }
+        function abrirConvertir(usuarioId, nombre) {
+            document.getElementById('convertirUsuarioId').value = usuarioId;
+            document.getElementById('convertirNombre').textContent = 'Usuario: ' + nombre;
+            document.getElementById('convertirEspecialidad').value = '';
+            document.getElementById('convertirTarifa').value = '';
+            document.getElementById('modalConvertir').classList.add('active');
+        }
+        
+        function convertirUsuario() {
+            var usuarioId = document.getElementById('convertirUsuarioId').value;
+            var especialidad = document.getElementById('convertirEspecialidad').value || 'General';
+            var tarifa = parseFloat(document.getElementById('convertirTarifa').value) || 0;
+            
+            var resultado = STORAGE.convertirEnTrabajador(usuarioId, especialidad, tarifa);
+            if (resultado) {
+                alert('✅ Usuario convertido en trabajador exitosamente');
+                cerrarModal();
+                mostrarTab('trabajadores');
+            } else {
+                alert('❌ Error al convertir usuario');
+            }
+        }
+        
+        function abrirModalNuevo() {
+            mostrarTab('usuarios');
+            alert('Selecciona un usuario de la lista y haz clic en "Convertir" para hacerlo trabajador.');
+        }
+        
+        function quitarTrabajador(id) {
+            if (confirm('¿Quitar este trabajador? El usuario seguirá existiendo.')) {
+                STORAGE.eliminar('trabajadores', id);
+                cargarTrabajadores();
+            }
+        }
         
         function editarTrabajador(id) {
-            var trabajadores = STORAGE.todos('trabajadores');
-            var t = trabajadores.find(function(x) { return x.id === id; });
+            var t = STORAGE.buscarPorId('trabajadores', id);
             if (!t) return;
-            
-            document.getElementById('modalTitulo').textContent = '✏️ Editar Trabajador';
-            document.getElementById('trabajadorId').value = t.id;
-            document.getElementById('nombre').value = t.nombre || '';
-            document.getElementById('apellidos').value = t.apellidos || '';
-            document.getElementById('carnet').value = t.carnet_identidad || '';
-            document.getElementById('telefono').value = t.telefono || '';
-            document.getElementById('email').value = t.email || '';
-            document.getElementById('especialidad').value = t.especialidad || '';
-            document.getElementById('tarifa_cup').value = t.tarifa_hora_cup || '';
-            document.getElementById('tarifa_usd').value = t.tarifa_hora_usd || '';
-            document.getElementById('tarifa_dia').value = t.tarifa_dia || '';
-            document.getElementById('activo').checked = t.activo !== false;
-            document.getElementById('modalTrabajador').classList.add('active');
+            var esp = prompt('Especialidad:', t.especialidad || '');
+            var tar = prompt('Tarifa (CUP/h):', t.tarifa_hora_cup || 0);
+            if (esp !== null && tar !== null) {
+                STORAGE.actualizar('trabajadores', id, { especialidad: esp, tarifa_hora_cup: parseFloat(tar) || 0 });
+                cargarTrabajadores();
+            }
         }
         
-        function guardarTrabajador() {
-            var id = document.getElementById('trabajadorId').value;
-            var datos = {
-                proyecto: usuarioActual.proyecto,
-                nombre: document.getElementById('nombre').value,
-                apellidos: document.getElementById('apellidos').value,
-                carnet_identidad: document.getElementById('carnet').value,
-                telefono: document.getElementById('telefono').value,
-                email: document.getElementById('email').value,
-                especialidad: document.getElementById('especialidad').value,
-                tarifa_hora_cup: parseFloat(document.getElementById('tarifa_cup').value) || 0,
-                tarifa_hora_usd: parseFloat(document.getElementById('tarifa_usd').value) || 0,
-                tarifa_dia: parseFloat(document.getElementById('tarifa_dia').value) || 0,
-                activo: document.getElementById('activo').checked
-            };
-            
-            if (id) { STORAGE.actualizar('trabajadores', id, datos); }
-            else { STORAGE.agregar('trabajadores', datos); }
-            
-            cerrarModal();
-            cargarTrabajadores();
-        }
-        
-        function toggleTrabajador(id) {
-            var trabajadores = STORAGE.todos('trabajadores');
-            var t = trabajadores.find(function(x) { return x.id === id; });
-            if (t) { STORAGE.actualizar('trabajadores', id, { activo: !(t.activo !== false) }); cargarTrabajadores(); }
-        }
-        
+        function cerrarModal() { document.getElementById('modalConvertir').classList.remove('active'); }
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
         function cerrarSesion() { localStorage.removeItem('erp_sesion'); sessionStorage.removeItem('erp_sesion'); window.location.href = 'login.html'; }
         
