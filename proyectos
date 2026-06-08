@@ -6,157 +6,168 @@
     <title>Proyectos - ERP Cuba</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --primary: #1a5276; --dark: #2c3e50; --light: #ecf0f1; --success: #27ae60; --danger: #c0392b; --warning: #f39c12; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); }
-        .app { display: flex; min-height: 100vh; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #ecf0f1; }
         
-        .sidebar { width: 260px; background: var(--dark); color: white; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; }
-        .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-header h3 { font-size: 16px; }
-        .sidebar-header small { opacity: 0.7; font-size: 12px; }
-        .sidebar-nav { padding: 15px 0; }
-        .nav-item { display: flex; align-items: center; gap: 10px; padding: 12px 20px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; }
-        .nav-item:hover, .nav-item.active { background: var(--primary); color: white; }
-        .sidebar-footer { padding: 15px 20px; border-top: 1px solid rgba(255,255,255,0.1); position: absolute; bottom: 0; width: 100%; }
-        .btn-logout { width: 100%; padding: 10px; background: rgba(255,255,255,0.1); color: white; border: none; border-radius: 8px; cursor: pointer; }
-        .btn-logout:hover { background: var(--danger); }
+        /* Sidebar */
+        .sidebar { width: 250px; background: #2c3e50; color: white; height: 100vh; position: fixed; left: 0; top: 0; padding: 20px 0; z-index: 100; transition: transform 0.3s; }
+        .sidebar h3 { padding: 0 20px 15px; border-bottom: 1px solid rgba(255,255,255,0.2); margin-bottom: 10px; font-size: 16px; }
+        .sidebar a { display: block; padding: 12px 20px; color: white; text-decoration: none; font-size: 14px; }
+        .sidebar a:hover, .sidebar a.active { background: #1a5276; }
+        .sidebar button { margin: 10px 20px; padding: 10px; width: calc(100% - 40px); background: #c0392b; color: white; border: none; border-radius: 5px; cursor: pointer; }
         
-        .main { flex: 1; margin-left: 260px; padding: 20px; }
-        .topbar { background: white; padding: 15px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        /* Main */
+        .main { margin-left: 250px; padding: 20px; transition: margin 0.3s; }
+        .topbar { background: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .topbar h1 { font-size: 20px; }
-        .btn-primary { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .btn { background: #1a5276; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .menu-btn { display: none; background: none; border: none; font-size: 26px; cursor: pointer; }
         
-        .search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
-        .search-bar input, .search-bar select { padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
-        .search-bar input { flex: 1; }
+        /* Overlay para móvil */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99; }
+        .overlay.show { display: block; }
         
-        .proyectos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-        .proyecto-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; transition: 0.2s; }
-        .proyecto-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-        .card-header h3 { font-size: 16px; color: var(--dark); }
-        .badge { padding: 4px 10px; border-radius: 15px; font-size: 11px; font-weight: bold; }
-        .badge.Pendiente { background: #fdebd0; color: var(--warning); }
-        .badge.En.Progreso { background: #d6eaf8; color: #2980b9; }
-        .badge.Completado { background: #d5f5e3; color: var(--success); }
-        .badge.Cancelado { background: #e0e0e0; color: #666; }
-        .badge.Baja { background: #d5f5e3; color: var(--success); }
-        .badge.Media { background: #fdebd0; color: var(--warning); }
-        .badge.Alta { background: #fadbd8; color: var(--danger); }
-        .badge.Urgente { background: #c0392b; color: white; }
-        .proyecto-card p { font-size: 13px; color: #555; margin: 5px 0; }
-        .card-actions { display: flex; gap: 5px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; }
-        .btn-icon { background: none; border: none; font-size: 16px; cursor: pointer; }
-        .btn-small { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+        /* Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .card h3 { margin-bottom: 10px; color: #2c3e50; }
+        .card p { margin: 5px 0; font-size: 13px; color: #555; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .Pendiente { background: #fdebd0; color: #f39c12; }
+        .En.Progreso { background: #d6eaf8; color: #2980b9; }
+        .Completado { background: #d5f5e3; color: #27ae60; }
+        .Cancelado { background: #e0e0e0; color: #666; }
+        .Alta { background: #fadbd8; color: #e74c3c; }
+        .Media { background: #fdebd0; color: #f39c12; }
+        .Baja { background: #d5f5e3; color: #27ae60; }
+        .Urgente { background: #c0392b; color: white; }
+        .card-actions { margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; }
+        .card-actions button { margin-right: 5px; padding: 5px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; color: white; }
         
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
-        .modal.active { display: flex; }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        .btn-secondary { background: #95a5a6; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; }
-        .menu-btn { display: none; background: none; border: none; font-size: 24px; cursor: pointer; }
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center; }
+        .modal.show { display: flex; }
+        .modal-box { background: white; padding: 25px; border-radius: 10px; width: 90%; max-width: 550px; max-height: 80vh; overflow-y: auto; }
+        .modal-box h2 { margin-bottom: 15px; }
+        .modal-box label { display: block; margin: 10px 0 5px; font-weight: bold; font-size: 13px; }
+        .modal-box input, .modal-box select, .modal-box textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 5px; }
+        .row { display: flex; gap: 10px; }
+        .row > div { flex: 1; }
+        .modal-actions { text-align: right; margin-top: 15px; }
+        .modal-actions button { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; margin-left: 5px; color: white; }
+        
+        .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+        .filter-bar input, .filter-bar select { padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
+        .filter-bar input { flex: 1; }
         
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(-260px); transition: 0.3s; }
+            .sidebar { transform: translateX(-250px); }
             .sidebar.open { transform: translateX(0); }
             .main { margin-left: 0; }
             .menu-btn { display: block; }
-            .form-row { grid-template-columns: 1fr; }
-            .proyectos-grid { grid-template-columns: 1fr; }
-            .search-bar { flex-direction: column; }
+            .row { flex-direction: column; }
         }
     </style>
 </head>
 <body>
-    <div class="app">
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <h3 id="proyectoNombre">🇨🇺 ERP Cuba</h3>
-                <small id="userNombre"></small>
-            </div>
-            <nav class="sidebar-nav">
-                <a href="dashboard.html" class="nav-item">📊 Dashboard</a>
-                <a href="clientes.html" class="nav-item">👥 Clientes</a>
-                <a href="trabajadores.html" class="nav-item">👷 Trabajadores</a>
-                <a href="proyectos.html" class="nav-item active">🏗️ Proyectos</a>
-            </nav>
-            <div class="sidebar-footer">
-                <button class="btn-logout" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
-            </div>
-        </aside>
-        
-        <main class="main">
-            <div class="topbar">
-                <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-                <h1>🏗️ Gestión de Proyectos</h1>
-                <button class="btn-primary" onclick="abrirModal()">➕ Nuevo Proyecto</button>
-            </div>
-            
-            <div class="search-bar">
-                <input type="text" id="busqueda" placeholder="🔍 Buscar proyecto..." onkeyup="cargarProyectos()">
-                <select id="filtroEstado" onchange="cargarProyectos()">
-                    <option value="">Todos</option>
-                    <option>Pendiente</option><option>En Progreso</option><option>Completado</option><option>Cancelado</option>
-                </select>
-            </div>
-            
-            <div class="proyectos-grid" id="proyectosGrid"></div>
-        </main>
+    <!-- Overlay para cerrar menú en móvil -->
+    <div class="overlay" id="overlay" onclick="cerrarMenu()"></div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <h3 id="proyectoNombre">🇨🇺 ERP Cuba</h3>
+        <p style="padding:0 20px 15px;font-size:12px;opacity:0.7;" id="userNombre"></p>
+        <a href="dashboard.html">📊 Dashboard</a>
+        <a href="clientes.html">👥 Clientes</a>
+        <a href="trabajadores.html">👷 Trabajadores</a>
+        <a href="proyectos.html" class="active">🏗️ Proyectos</a>
+        <br>
+        <button onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
     </div>
     
-    <div class="modal" id="modalProyecto">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitulo">➕ Nuevo Proyecto</h2>
-                <button class="modal-close" onclick="cerrarModal()">&times;</button>
+    <!-- Main -->
+    <div class="main">
+        <div class="topbar">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <button class="menu-btn" onclick="abrirMenu()">☰</button>
+                <h1>🏗️ Proyectos</h1>
             </div>
-            <form id="formProyecto" onsubmit="return false;">
-                <input type="hidden" id="proyectoId">
-                <div class="form-group"><label>📋 Nombre *</label><input type="text" id="nombre" required></div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>👥 Cliente</label>
-                        <select id="cliente_id"></select>
-                    </div>
-                    <div class="form-group">
-                        <label>📊 Estado</label>
-                        <select id="estado">
-                            <option>Pendiente</option><option>En Progreso</option><option>Completado</option><option>Cancelado</option>
-                        </select>
-                    </div>
+            <button class="btn" onclick="abrirModal()">➕ Nuevo Proyecto</button>
+        </div>
+        
+        <div class="filter-bar">
+            <input type="text" id="busqueda" placeholder="🔍 Buscar proyecto..." oninput="cargar()">
+            <select id="filtroEstado" onchange="cargar()">
+                <option value="">Todos los estados</option>
+                <option>Pendiente</option>
+                <option>En Progreso</option>
+                <option>Completado</option>
+                <option>Cancelado</option>
+            </select>
+        </div>
+        
+        <div class="grid" id="proyectosGrid">
+            <p style="grid-column:1/-1;text-align:center;padding:40px;">Cargando proyectos...</p>
+        </div>
+    </div>
+    
+    <!-- Modal -->
+    <div class="modal" id="modalProyecto">
+        <div class="modal-box">
+            <h2 id="modalTitulo">➕ Nuevo Proyecto</h2>
+            <input type="hidden" id="proyectoId">
+            
+            <label>📋 Nombre *</label>
+            <input type="text" id="nombre" required>
+            
+            <div class="row">
+                <div>
+                    <label>👥 Cliente</label>
+                    <select id="cliente_id"><option value="">Sin cliente</option></select>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>⚠️ Prioridad</label>
-                        <select id="prioridad">
-                            <option>Baja</option><option selected>Media</option><option>Alta</option><option>Urgente</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>💰 Moneda</label>
-                        <select id="moneda"><option>CUP</option><option>USD</option></select>
-                    </div>
+                <div>
+                    <label>📊 Estado</label>
+                    <select id="estado">
+                        <option>Pendiente</option>
+                        <option>En Progreso</option>
+                        <option>Completado</option>
+                        <option>Cancelado</option>
+                    </select>
                 </div>
-                <div class="form-row">
-                    <div class="form-group"><label>📅 Inicio</label><input type="date" id="fecha_inicio"></div>
-                    <div class="form-group"><label>📅 Fin Estimado</label><input type="date" id="fecha_fin"></div>
+            </div>
+            
+            <div class="row">
+                <div>
+                    <label>⚠️ Prioridad</label>
+                    <select id="prioridad">
+                        <option>Baja</option>
+                        <option selected>Media</option>
+                        <option>Alta</option>
+                        <option>Urgente</option>
+                    </select>
                 </div>
-                <div class="form-row">
-                    <div class="form-group"><label>💰 Presupuesto (CUP)</label><input type="number" id="presupuesto_cup" step="0.01"></div>
-                    <div class="form-group"><label>💵 Presupuesto (USD)</label><input type="number" id="presupuesto_usd" step="0.01"></div>
+                <div>
+                    <label>💰 Moneda</label>
+                    <select id="moneda"><option>CUP</option><option>USD</option></select>
                 </div>
-                <div class="form-group"><label>📝 Descripción</label><textarea id="descripcion" rows="2"></textarea></div>
-                <div class="form-actions">
-                    <button type="button" class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
-                    <button type="submit" class="btn-primary" onclick="guardarProyecto()">💾 Guardar</button>
-                </div>
-            </form>
+            </div>
+            
+            <div class="row">
+                <div><label>📅 Inicio</label><input type="date" id="fecha_inicio"></div>
+                <div><label>📅 Fin Estimado</label><input type="date" id="fecha_fin"></div>
+            </div>
+            
+            <div class="row">
+                <div><label>💰 Presupuesto (CUP)</label><input type="number" id="presupuesto_cup" step="0.01"></div>
+                <div><label>💵 Presupuesto (USD)</label><input type="number" id="presupuesto_usd" step="0.01"></div>
+            </div>
+            
+            <label>📝 Descripción</label>
+            <textarea id="descripcion" rows="2"></textarea>
+            
+            <div class="modal-actions">
+                <button style="background:#95a5a6;" onclick="cerrarModal()">Cancelar</button>
+                <button style="background:#1a5276;" onclick="guardar()">💾 Guardar</button>
+            </div>
         </div>
     </div>
 
@@ -164,57 +175,49 @@
     <script>
         var usuarioActual = null;
         
-        function verificarSesion() {
-            var sesion = localStorage.getItem('erp_sesion') || sessionStorage.getItem('erp_sesion');
-            if (!sesion) { window.location.href = 'login.html'; return; }
-            usuarioActual = JSON.parse(sesion);
-            document.getElementById('proyectoNombre').textContent = usuarioActual.proyecto;
-            document.getElementById('userNombre').textContent = usuarioActual.nombre;
+        // Verificar sesión
+        var sesion = localStorage.getItem('erp_sesion') || sessionStorage.getItem('erp_sesion');
+        if (!sesion) { window.location.href = 'login.html'; }
+        usuarioActual = JSON.parse(sesion);
+        document.getElementById('proyectoNombre').textContent = usuarioActual.proyecto || 'ERP Cuba';
+        document.getElementById('userNombre').textContent = usuarioActual.nombre || '';
+        
+        // Menú responsive
+        function abrirMenu() {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('overlay').classList.add('show');
         }
         
-        function cargarClientesEnSelect() {
-            var clientes = STORAGE.buscar('clientes', 'proyecto', usuarioActual.proyecto);
-            var select = document.getElementById('cliente_id');
-            select.innerHTML = '<option value="">Sin cliente</option>';
-            clientes.forEach(function(c) {
-                select.innerHTML += '<option value="' + c.id + '">' + c.nombre + '</option>';
-            });
+        function cerrarMenu() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.remove('show');
         }
         
-        function cargarProyectos() {
+        function cargar() {
             var busqueda = document.getElementById('busqueda').value.toLowerCase();
-            var filtroEstado = document.getElementById('filtroEstado').value;
+            var filtro = document.getElementById('filtroEstado').value;
             var proyectos = STORAGE.buscar('proyectos', 'proyecto', usuarioActual.proyecto);
             var clientes = STORAGE.buscar('clientes', 'proyecto', usuarioActual.proyecto);
             
-            if (busqueda) {
-                proyectos = proyectos.filter(function(p) {
-                    return (p.nombre || '').toLowerCase().includes(busqueda);
-                });
-            }
-            if (filtroEstado) {
-                proyectos = proyectos.filter(function(p) { return p.estado === filtroEstado; });
-            }
+            if (busqueda) { proyectos = proyectos.filter(function(p) { return (p.nombre||'').toLowerCase().includes(busqueda); }); }
+            if (filtro) { proyectos = proyectos.filter(function(p) { return p.estado === filtro; }); }
             
             var grid = document.getElementById('proyectosGrid');
             if (proyectos.length === 0) {
-                grid.innerHTML = '<p style="text-align:center;grid-column:1/-1;">No hay proyectos</p>';
+                grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:40px;">No hay proyectos</p>';
                 return;
             }
             
             grid.innerHTML = proyectos.map(function(p) {
                 var cliente = clientes.find(function(c) { return c.id === p.cliente_id; });
-                return '<div class="proyecto-card">' +
-                    '<div class="card-header">' +
-                        '<h3>' + (p.nombre || '') + '</h3>' +
-                        '<span class="badge ' + (p.estado || '').replace(' ', '.') + '">' + (p.estado || '') + '</span>' +
-                    '</div>' +
+                return '<div class="card">' +
+                    '<h3>' + (p.nombre||'') + ' <span class="badge ' + (p.estado||'').replace(' ','.') + '">' + (p.estado||'') + '</span></h3>' +
                     '<p><strong>Cliente:</strong> ' + (cliente ? cliente.nombre : 'Sin cliente') + '</p>' +
-                    '<p><strong>Prioridad:</strong> <span class="badge ' + (p.prioridad || '') + '">' + (p.prioridad || '') + '</span></p>' +
-                    '<p><strong>Presupuesto:</strong> ' + (p.presupuesto_cup || 0).toLocaleString('es-ES') + ' ' + (p.moneda || 'CUP') + '</p>' +
+                    '<p><strong>Prioridad:</strong> <span class="badge ' + (p.prioridad||'') + '">' + (p.prioridad||'') + '</span></p>' +
+                    '<p><strong>Presupuesto:</strong> ' + (p.presupuesto_cup||0).toLocaleString('es-ES') + ' ' + (p.moneda||'CUP') + '</p>' +
                     '<div class="card-actions">' +
-                        '<button class="btn-small" onclick="editarProyecto(\'' + p.id + '\')">✏️ Editar</button>' +
-                        '<button class="btn-small" onclick="cambiarEstado(\'' + p.id + '\')">🔄 Cambiar</button>' +
+                        '<button style="background:#2980b9;" onclick="editar(\'' + p.id + '\')">✏️ Editar</button>' +
+                        '<button style="background:#f39c12;" onclick="cambiarEstado(\'' + p.id + '\')">🔄 Estado</button>' +
                     '</div>' +
                 '</div>';
             }).join('');
@@ -222,17 +225,29 @@
         
         function abrirModal() {
             document.getElementById('modalTitulo').textContent = '➕ Nuevo Proyecto';
-            document.getElementById('formProyecto').reset();
             document.getElementById('proyectoId').value = '';
-            cargarClientesEnSelect();
-            document.getElementById('modalProyecto').classList.add('active');
+            document.getElementById('nombre').value = '';
+            document.getElementById('estado').value = 'Pendiente';
+            document.getElementById('prioridad').value = 'Media';
+            document.getElementById('moneda').value = 'CUP';
+            document.getElementById('fecha_inicio').value = '';
+            document.getElementById('fecha_fin').value = '';
+            document.getElementById('presupuesto_cup').value = '';
+            document.getElementById('presupuesto_usd').value = '';
+            document.getElementById('descripcion').value = '';
+            
+            var clientes = STORAGE.buscar('clientes', 'proyecto', usuarioActual.proyecto);
+            var select = document.getElementById('cliente_id');
+            select.innerHTML = '<option value="">Sin cliente</option>';
+            clientes.forEach(function(c) { select.innerHTML += '<option value="' + c.id + '">' + c.nombre + '</option>'; });
+            
+            document.getElementById('modalProyecto').classList.add('show');
         }
         
-        function cerrarModal() { document.getElementById('modalProyecto').classList.remove('active'); }
+        function cerrarModal() { document.getElementById('modalProyecto').classList.remove('show'); }
         
-        function editarProyecto(id) {
-            var proyectos = STORAGE.todos('proyectos');
-            var p = proyectos.find(function(x) { return x.id === id; });
+        function editar(id) {
+            var p = STORAGE.buscarPorId('proyectos', id);
             if (!p) return;
             
             document.getElementById('modalTitulo').textContent = '✏️ Editar Proyecto';
@@ -246,12 +261,19 @@
             document.getElementById('presupuesto_cup').value = p.presupuesto_cup || '';
             document.getElementById('presupuesto_usd').value = p.presupuesto_usd || '';
             document.getElementById('descripcion').value = p.descripcion || '';
-            cargarClientesEnSelect();
-            document.getElementById('cliente_id').value = p.cliente_id || '';
-            document.getElementById('modalProyecto').classList.add('active');
+            
+            var clientes = STORAGE.buscar('clientes', 'proyecto', usuarioActual.proyecto);
+            var select = document.getElementById('cliente_id');
+            select.innerHTML = '<option value="">Sin cliente</option>';
+            clientes.forEach(function(c) {
+                var sel = c.id === p.cliente_id ? ' selected' : '';
+                select.innerHTML += '<option value="' + c.id + '"' + sel + '>' + c.nombre + '</option>';
+            });
+            
+            document.getElementById('modalProyecto').classList.add('show');
         }
         
-        function guardarProyecto() {
+        function guardar() {
             var id = document.getElementById('proyectoId').value;
             var datos = {
                 proyecto: usuarioActual.proyecto,
@@ -260,34 +282,41 @@
                 estado: document.getElementById('estado').value,
                 prioridad: document.getElementById('prioridad').value,
                 moneda: document.getElementById('moneda').value,
-                fecha_inicio: document.getElementById('fecha_inicio').value,
-                fecha_fin: document.getElementById('fecha_fin').value,
+                fecha_inicio: document.getElementById('fecha_inicio').value || null,
+                fecha_fin: document.getElementById('fecha_fin').value || null,
                 presupuesto_cup: parseFloat(document.getElementById('presupuesto_cup').value) || 0,
                 presupuesto_usd: parseFloat(document.getElementById('presupuesto_usd').value) || 0,
-                descripcion: document.getElementById('descripcion').value
+                descripcion: document.getElementById('descripcion').value || null
             };
             
             if (id) { STORAGE.actualizar('proyectos', id, datos); }
             else { STORAGE.agregar('proyectos', datos); }
             
             cerrarModal();
-            cargarProyectos();
+            cargar();
         }
         
         function cambiarEstado(id) {
             var estados = ['Pendiente', 'En Progreso', 'Completado', 'Cancelado'];
-            var nuevo = prompt('Nuevo estado: ' + estados.join(', '));
-            if (nuevo && estados.includes(nuevo)) {
+            var nuevo = prompt('Nuevo estado:\n' + estados.join(' | '));
+            if (nuevo && estados.indexOf(nuevo) >= 0) {
                 STORAGE.actualizar('proyectos', id, { estado: nuevo });
-                cargarProyectos();
+                cargar();
             }
         }
         
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-        function cerrarSesion() { localStorage.removeItem('erp_sesion'); sessionStorage.removeItem('erp_sesion'); window.location.href = 'login.html'; }
+        function cerrarSesion() {
+            localStorage.removeItem('erp_sesion');
+            sessionStorage.removeItem('erp_sesion');
+            window.location.href = 'login.html';
+        }
         
-        verificarSesion();
-        cargarProyectos();
+        // Cerrar menú al hacer clic en un enlace
+        document.querySelectorAll('.sidebar a').forEach(function(link) {
+            link.addEventListener('click', cerrarMenu);
+        });
+        
+        cargar();
     </script>
 </body>
 </html>
