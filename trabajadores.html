@@ -6,137 +6,124 @@
     <title>Trabajadores - ERP Cuba</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --primary: #1a5276; --dark: #2c3e50; --light: #ecf0f1; --success: #27ae60; --danger: #c0392b; --warning: #f39c12; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); }
-        .app { display: flex; min-height: 100vh; }
-        .sidebar { width: 260px; background: var(--dark); color: white; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; }
-        .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-header h3 { font-size: 16px; } .sidebar-header small { opacity: 0.7; font-size: 12px; }
-        .sidebar-nav { padding: 15px 0; }
-        .nav-item { display: flex; align-items: center; gap: 10px; padding: 12px 20px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; }
-        .nav-item:hover, .nav-item.active { background: var(--primary); color: white; }
-        .sidebar-footer { padding: 15px 20px; border-top: 1px solid rgba(255,255,255,0.1); position: absolute; bottom: 0; width: 100%; }
-        .btn-logout { width: 100%; padding: 10px; background: rgba(255,255,255,0.1); color: white; border: none; border-radius: 8px; cursor: pointer; }
-        .btn-logout:hover { background: var(--danger); }
-        .main { flex: 1; margin-left: 260px; padding: 20px; }
-        .topbar { background: white; padding: 15px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .btn-primary { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; }
-        
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #ecf0f1; }
+        .sidebar { width: 250px; background: #2c3e50; color: white; height: 100vh; position: fixed; left: 0; top: 0; padding: 20px 0; z-index: 100; transition: transform 0.3s; }
+        .sidebar h3 { padding: 0 20px 15px; border-bottom: 1px solid rgba(255,255,255,0.2); margin-bottom: 10px; font-size: 16px; }
+        .sidebar p { padding: 0 20px 15px; font-size: 12px; opacity: 0.7; }
+        .sidebar a { display: block; padding: 12px 20px; color: white; text-decoration: none; font-size: 14px; }
+        .sidebar a:hover, .sidebar a.active { background: #1a5276; }
+        .sidebar button { margin: 10px 20px; padding: 10px; width: calc(100% - 40px); background: #c0392b; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .main { margin-left: 250px; padding: 20px; transition: margin 0.3s; }
+        .topbar { background: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .topbar h1 { font-size: 20px; }
+        .btn { background: #1a5276; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .menu-btn { display: none; background: none; border: none; font-size: 26px; cursor: pointer; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99; }
+        .overlay.show { display: block; }
         .tabs { display: flex; gap: 0; margin-bottom: 20px; }
-        .tab { padding: 10px 20px; background: white; border: 1px solid #ddd; cursor: pointer; font-weight: 600; }
-        .tab.active { background: var(--primary); color: white; }
+        .tab { padding: 10px 20px; background: white; border: 1px solid #ddd; cursor: pointer; font-weight: 600; font-size: 14px; }
+        .tab.active { background: #1a5276; color: white; }
         .tab:first-child { border-radius: 8px 0 0 8px; }
         .tab:last-child { border-radius: 0 8px 8px 0; }
-        
-        .section { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .section { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; }
-        th { background: var(--light); }
-        .badge { padding: 4px 10px; border-radius: 15px; font-size: 11px; font-weight: bold; }
-        .badge.activo { background: #d5f5e3; color: var(--success); }
-        .badge.inactivo { background: #e0e0e0; color: #666; }
-        .badge.si { background: #d5f5e3; color: var(--success); }
-        .badge.no { background: #fdebd0; color: var(--warning); }
-        .btn-small { padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; margin: 0 2px; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-warning { background: var(--warning); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
-        .modal.active { display: flex; }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
-        .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        .btn-secondary { background: #95a5a6; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; }
-        .menu-btn { display: none; background: none; border: none; font-size: 24px; cursor: pointer; }
-        @media (max-width: 768px) { .sidebar { transform: translateX(-260px); } .sidebar.open { transform: translateX(0); } .main { margin-left: 0; } .menu-btn { display: block; } }
+        th { background: #f5f5f5; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .badge.si { background: #d5f5e3; color: #27ae60; }
+        .badge.no { background: #fdebd0; color: #f39c12; }
+        .badge.activo { background: #d5f5e3; color: #27ae60; }
+        .btn-small { padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; color: white; margin: 0 2px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center; }
+        .modal.show { display: flex; }
+        .modal-box { background: white; padding: 25px; border-radius: 10px; width: 90%; max-width: 450px; }
+        .modal-box h2 { margin-bottom: 15px; }
+        .modal-box label { display: block; margin: 10px 0 5px; font-weight: bold; font-size: 13px; }
+        .modal-box input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
+        .modal-actions { text-align: right; margin-top: 15px; }
+        .modal-actions button { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; margin-left: 5px; color: white; }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-250px); }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; }
+            .menu-btn { display: block; }
+        }
     </style>
 </head>
 <body>
-    <div class="app">
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header"><h3 id="proyectoNombre">🇨🇺 ERP Cuba</h3><small id="userNombre"></small></div>
-            <nav class="sidebar-nav">
-                <a href="dashboard.html" class="nav-item">📊 Dashboard</a>
-                <a href="clientes.html" class="nav-item">👥 Clientes</a>
-                <a href="trabajadores.html" class="nav-item active">👷 Trabajadores</a>
-                <a href="proyectos.html" class="nav-item">🏗️ Proyectos</a>
-            </nav>
-            <div class="sidebar-footer"><button class="btn-logout" onclick="cerrarSesion()">🚪 Cerrar Sesión</button></div>
-        </aside>
-        
-        <main class="main">
-            <div class="topbar">
-                <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-                <h1>👷 Gestión de Trabajadores</h1>
-            </div>
-            
-            <!-- Pestañas -->
-            <div class="tabs">
-                <div class="tab active" onclick="mostrarTab('trabajadores')">👷 Trabajadores Activos</div>
-                <div class="tab" onclick="mostrarTab('usuarios')">👤 Usuarios Registrados</div>
-            </div>
-            
-            <!-- Tabla de Trabajadores -->
-            <div class="section" id="tabTrabajadores">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-                    <h2>Trabajadores Activos</h2>
-                    <button class="btn-primary" onclick="abrirModalNuevo()">➕ Nuevo Trabajador</button>
-                </div>
-                <table>
-                    <thead><tr><th>Nombre</th><th>Especialidad</th><th>Tarifa (CUP/h)</th><th>Teléfono</th><th>Proyectos</th><th>Acciones</th></tr></thead>
-                    <tbody id="trabajadoresBody"></tbody>
-                </table>
-            </div>
-            
-            <!-- Tabla de Usuarios -->
-            <div class="section" id="tabUsuarios" style="display:none;">
-                <h2 style="margin-bottom:15px;">Usuarios Registrados</h2>
-                <p style="margin-bottom:15px;color:#666;">Estos son los usuarios del sistema. Puedes convertirlos en trabajadores.</p>
-                <table>
-                    <thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>¿Es Trabajador?</th><th>Acción</th></tr></thead>
-                    <tbody id="usuariosBody"></tbody>
-                </table>
-            </div>
-        </main>
+    <div class="overlay" id="overlay" onclick="cerrarMenu()"></div>
+    
+    <div class="sidebar" id="sidebar">
+        <h3 id="proyectoNombre">🇨🇺 ERP Cuba</h3>
+        <p id="userNombre"></p>
+        <a href="dashboard.html">📊 Dashboard</a>
+        <a href="clientes.html">👥 Clientes</a>
+        <a href="trabajadores.html" class="active">👷 Trabajadores</a>
+        <a href="proyectos.html">🏗️ Proyectos</a>
+        <button onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
     </div>
     
-    <!-- Modal para convertir usuario en trabajador -->
+    <div class="main">
+        <div class="topbar">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <button class="menu-btn" onclick="abrirMenu()">☰</button>
+                <h1>👷 Gestión de Trabajadores</h1>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="mostrarTab('trabajadores')">👷 Trabajadores ({{proyecto}})</div>
+            <div class="tab" onclick="mostrarTab('usuarios')">👤 Todos los Usuarios</div>
+        </div>
+        
+        <div class="section" id="tabTrabajadores">
+            <h2 style="margin-bottom:15px;">Trabajadores de tu Proyecto</h2>
+            <table>
+                <thead><tr><th>Nombre</th><th>Especialidad</th><th>Tarifa (CUP/h)</th><th>Teléfono</th><th>Acciones</th></tr></thead>
+                <tbody id="trabajadoresBody"><tr><td colspan="5" style="text-align:center;">Cargando...</td></tr></tbody>
+            </table>
+        </div>
+        
+        <div class="section" id="tabUsuarios" style="display:none;">
+            <h2 style="margin-bottom:15px;">Todos los Usuarios Registrados</h2>
+            <p style="margin-bottom:15px;color:#666;font-size:13px;">Aquí ves todos los usuarios del sistema. Convierte en trabajador a quien necesites.</p>
+            <table>
+                <thead><tr><th>Nombre</th><th>Email</th><th>Proyecto</th><th>Teléfono</th><th>¿Es Trabajador?</th><th>Acción</th></tr></thead>
+                <tbody id="usuariosBody"><tr><td colspan="6" style="text-align:center;">Cargando...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+    
     <div class="modal" id="modalConvertir">
-        <div class="modal-content">
-            <div class="modal-header"><h2>🔧 Convertir en Trabajador</h2><button class="modal-close" onclick="cerrarModal()">&times;</button></div>
-            <form onsubmit="return false;">
-                <input type="hidden" id="convertirUsuarioId">
-                <p id="convertirNombre" style="font-weight:bold;margin-bottom:15px;"></p>
-                <div class="form-group"><label>🔧 Especialidad</label><input type="text" id="convertirEspecialidad" placeholder="Ej: Albañil, Electricista..."></div>
-                <div class="form-group"><label>💰 Tarifa por Hora (CUP)</label><input type="number" id="convertirTarifa" placeholder="350" step="0.01"></div>
-                <div class="form-actions">
-                    <button type="button" class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
-                    <button type="submit" class="btn-primary btn-success" onclick="convertirUsuario()">✅ Convertir</button>
-                </div>
-            </form>
+        <div class="modal-box">
+            <h2>🔧 Convertir en Trabajador</h2>
+            <input type="hidden" id="convertirUsuarioId">
+            <p id="convertirNombre" style="font-weight:bold;margin-bottom:15px;"></p>
+            <label>🔧 Especialidad</label>
+            <input type="text" id="convertirEspecialidad" placeholder="Ej: Albañil, Electricista...">
+            <label>💰 Tarifa por Hora (CUP)</label>
+            <input type="number" id="convertirTarifa" placeholder="350" step="0.01">
+            <div class="modal-actions">
+                <button style="background:#95a5a6;" onclick="cerrarModal()">Cancelar</button>
+                <button style="background:#27ae60;" onclick="convertirUsuario()">✅ Convertir</button>
+            </div>
         </div>
     </div>
 
     <script src="js/storage.js"></script>
     <script>
         var usuarioActual = null;
-        var tabActual = 'trabajadores';
         
-        function verificarSesion() {
-            var sesion = localStorage.getItem('erp_sesion') || sessionStorage.getItem('erp_sesion');
-            if (!sesion) { window.location.href = 'login.html'; return; }
-            usuarioActual = JSON.parse(sesion);
-            document.getElementById('proyectoNombre').textContent = usuarioActual.proyecto;
-            document.getElementById('userNombre').textContent = usuarioActual.nombre;
-        }
+        var sesion = localStorage.getItem('erp_sesion') || sessionStorage.getItem('erp_sesion');
+        if (!sesion) { window.location.href = 'login.html'; }
+        usuarioActual = JSON.parse(sesion);
+        document.getElementById('proyectoNombre').textContent = usuarioActual.proyecto || 'ERP Cuba';
+        document.getElementById('userNombre').textContent = usuarioActual.nombre || '';
+        
+        function abrirMenu() { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('show'); }
+        function cerrarMenu() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
         
         function mostrarTab(tab) {
-            tabActual = tab;
             document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
             if (tab === 'trabajadores') {
                 document.querySelectorAll('.tab')[0].classList.add('active');
@@ -153,39 +140,38 @@
         
         function cargarTrabajadores() {
             var trabajadores = STORAGE.buscar('trabajadores', 'proyecto', usuarioActual.proyecto);
-            var proyectos = STORAGE.buscar('proyectos', 'proyecto', usuarioActual.proyecto);
             var tbody = document.getElementById('trabajadoresBody');
             
             if (trabajadores.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay trabajadores. Ve a "Usuarios Registrados" para convertir alguno.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay trabajadores. Ve a "Todos los Usuarios" para convertir alguno.</td></tr>';
                 return;
             }
             
             tbody.innerHTML = trabajadores.map(function(t) {
-                var proyectosAsignados = proyectos.filter(function(p) {
-                    return p.trabajadores_asignados && p.trabajadores_asignados.indexOf(t.id) >= 0;
-                });
                 return '<tr>' +
                     '<td><strong>' + t.nombre + ' ' + (t.apellidos || '') + '</strong></td>' +
                     '<td>' + (t.especialidad || '-') + '</td>' +
                     '<td>' + (t.tarifa_hora_cup || 0).toFixed(2) + ' CUP</td>' +
                     '<td>' + (t.telefono || '-') + '</td>' +
-                    '<td>' + proyectosAsignados.length + ' proyecto(s)</td>' +
                     '<td>' +
-                        '<button class="btn-small btn-warning" onclick="editarTrabajador(\'' + t.id + '\')">✏️</button>' +
-                        '<button class="btn-small btn-danger" onclick="quitarTrabajador(\'' + t.id + '\')">🗑️</button>' +
+                        '<button class="btn-small" style="background:#f39c12;" onclick="editarTrabajador(\'' + t.id + '\')">✏️</button>' +
+                        '<button class="btn-small" style="background:#c0392b;" onclick="quitarTrabajador(\'' + t.id + '\')">🗑️</button>' +
                     '</td>' +
                 '</tr>';
             }).join('');
         }
         
         function cargarUsuarios() {
-            var usuarios = STORAGE.usuariosTrabajadores(usuarioActual.proyecto);
-            var trabajadores = STORAGE.buscar('trabajadores', 'proyecto', usuarioActual.proyecto);
+            // MOSTRAR TODOS LOS USUARIOS (no solo los del proyecto)
+            var usuarios = STORAGE.todos('usuarios');
+            var trabajadores = STORAGE.todos('trabajadores');
             var tbody = document.getElementById('usuariosBody');
             
+            console.log('👥 Todos los usuarios:', usuarios.length);
+            console.log('👷 Todos los trabajadores:', trabajadores.length);
+            
             if (usuarios.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay usuarios registrados</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay usuarios registrados aún</td></tr>';
                 return;
             }
             
@@ -194,9 +180,13 @@
                 return '<tr>' +
                     '<td><strong>' + u.nombre + '</strong></td>' +
                     '<td>' + u.email + '</td>' +
+                    '<td><span class="badge ' + (u.proyecto === 'Proyecto Bernal' ? 'si' : 'no') + '">' + u.proyecto + '</span></td>' +
                     '<td>' + (u.telefono || '-') + '</td>' +
                     '<td><span class="badge ' + (esTrabajador ? 'si' : 'no') + '">' + (esTrabajador ? 'Sí' : 'No') + '</span></td>' +
-                    '<td>' + (!esTrabajador ? '<button class="btn-small btn-success" onclick="abrirConvertir(\'' + u.id + '\', \'' + u.nombre + '\')">🔧 Convertir</button>' : '<span style="color:gray;">Ya es trabajador</span>') + '</td>' +
+                    '<td>' + (!esTrabajador ? 
+                        '<button class="btn-small" style="background:#27ae60;" onclick="abrirConvertir(\'' + u.id + '\', \'' + u.nombre + '\')">🔧 Convertir</button>' : 
+                        '<span style="color:gray;font-size:12px;">Ya asignado</span>') + 
+                    '</td>' +
                 '</tr>';
             }).join('');
         }
@@ -206,7 +196,7 @@
             document.getElementById('convertirNombre').textContent = 'Usuario: ' + nombre;
             document.getElementById('convertirEspecialidad').value = '';
             document.getElementById('convertirTarifa').value = '';
-            document.getElementById('modalConvertir').classList.add('active');
+            document.getElementById('modalConvertir').classList.add('show');
         }
         
         function convertirUsuario() {
@@ -224,17 +214,7 @@
             }
         }
         
-        function abrirModalNuevo() {
-            mostrarTab('usuarios');
-            alert('Selecciona un usuario de la lista y haz clic en "Convertir" para hacerlo trabajador.');
-        }
-        
-        function quitarTrabajador(id) {
-            if (confirm('¿Quitar este trabajador? El usuario seguirá existiendo.')) {
-                STORAGE.eliminar('trabajadores', id);
-                cargarTrabajadores();
-            }
-        }
+        function cerrarModal() { document.getElementById('modalConvertir').classList.remove('show'); }
         
         function editarTrabajador(id) {
             var t = STORAGE.buscarPorId('trabajadores', id);
@@ -247,11 +227,17 @@
             }
         }
         
-        function cerrarModal() { document.getElementById('modalConvertir').classList.remove('active'); }
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+        function quitarTrabajador(id) {
+            if (confirm('¿Quitar este trabajador? El usuario seguirá existiendo.')) {
+                STORAGE.eliminar('trabajadores', id);
+                cargarTrabajadores();
+            }
+        }
+        
         function cerrarSesion() { localStorage.removeItem('erp_sesion'); sessionStorage.removeItem('erp_sesion'); window.location.href = 'login.html'; }
         
-        verificarSesion();
+        document.querySelectorAll('.sidebar a').forEach(function(link) { link.addEventListener('click', cerrarMenu); });
+        
         cargarTrabajadores();
     </script>
 </body>
